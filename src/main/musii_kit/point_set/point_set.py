@@ -6,8 +6,17 @@ import numpy as np
 class PointSet:
     """ A point set representation of a piece of music. """
 
-    def __init__(self, points):
+    def __init__(self, points) -> object:
         self._points = points
+
+    def points_array(self):
+        """
+        Returns the points as a numpy array where each point occupies a single
+        line.
+
+        :return: the points as a numpy array
+        """
+        return self._points
 
 
 class Pattern:
