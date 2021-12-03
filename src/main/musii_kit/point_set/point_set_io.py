@@ -2,7 +2,7 @@ import json
 
 import numpy as np
 
-from point_set.point_set import PointSet, PatternOccurrences
+from musii_kit.point_set.point_set import PointSet, PatternOccurrences
 
 
 def write_patterns_to_json(pattern_occurrences: PatternOccurrences, output_path):
@@ -24,7 +24,7 @@ def read_patterns_from_json(input_path) -> PatternOccurrences:
     :return: the pattern occurrences
     """
     with open(input_path, 'r') as input_file:
-        return PatternOccurrences.from_dict(json.loads(json.load(input_file)))
+        return PatternOccurrences.from_dict(json.loads(input_file.read()))
 
 
 def save_to_csv(point_set: PointSet, path, decimal_places=2):
