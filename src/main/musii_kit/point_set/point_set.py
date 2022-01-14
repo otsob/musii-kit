@@ -41,6 +41,9 @@ class Pattern:
     def __str__(self):
         return f'[{self.label}; {self.source}; {self._data_type}: {self._pattern}]'
 
+    def __len__(self):
+        return self._pattern.shape[0]
+
     @staticmethod
     def from_dict(input_dict):
         label = input_dict['label']

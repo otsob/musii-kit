@@ -84,3 +84,11 @@ class MirexMetricsTests(unittest.TestCase):
         ground_truth = [self.occ_a, self.occ_b, self.occ_b]
         est_matrix = mirex.establishment_matrix(ground_truth, patterns)
         self.assertEqual(2 * 1.0 * (2.0 / 3.0) / (1.0 + (2.0 / 3.0)), mirex.establishment_f1(est_matrix))
+
+    def test_three_layer_metrics(self):
+        patterns = [self.occ_a, self.occ_a]
+        # Simple sanity check test
+        f_score_mat = mirex.layer_two_f_score_matrix(patterns, patterns)
+        self.assertEqual(1.0, mirex.three_layer_precision(f_score_mat))
+        self.assertEqual(1.0, mirex.three_layer_recall(f_score_mat))
+        self.assertEqual(1.0, mirex.three_layer_f_score(f_score_mat))

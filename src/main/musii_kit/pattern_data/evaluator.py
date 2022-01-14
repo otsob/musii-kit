@@ -57,7 +57,7 @@ class Evaluator:
             piece_result[Evaluator.EST_RECALL] = r_est
             p_est = mirex.establishment_precision(est_matrix)
             piece_result[Evaluator.EST_PRECISION] = p_est
-            piece_result[Evaluator.EST_F_ONE] = mirex.basic_f1(p_est, r_est)
+            piece_result[Evaluator.EST_F_ONE] = mirex.f_score(p_est, r_est)
 
             evaluation_result[piece] = piece_result
 
