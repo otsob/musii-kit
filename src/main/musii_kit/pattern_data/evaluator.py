@@ -11,7 +11,10 @@ class Evaluator:
 
     EST_RECALL = 'establishment_recall'
     EST_PRECISION = 'establishment_precision'
-    EST_F_ONE = 'establishment_F1'
+    EST_F_SCORE = 'establishment_F1'
+    TL_PRECISION = 'three-layer_precision'
+    TL_RECALL = 'three-layer_recall'
+    TL_F_SCORE = 'three-layer_F1'
 
     def __init__(self, ground_truth: PatternSet):
         """
@@ -52,13 +55,27 @@ class Evaluator:
             output_patterns = evaluated_data[piece][1]
 
             piece_result = {}
-            est_matrix = mirex.establishment_matrix(gt_patterns, output_patterns)
-            r_est = mirex.establishment_recall(est_matrix)
-            piece_result[Evaluator.EST_RECALL] = r_est
-            p_est = mirex.establishment_precision(est_matrix)
-            piece_result[Evaluator.EST_PRECISION] = p_est
-            piece_result[Evaluator.EST_F_ONE] = mirex.f_score(p_est, r_est)
+            Evaluator.__compute_establishment_scores(gt_patterns, output_patterns, piece_result)
+            Evaluator.__compute_three_layer_scores(gt_patterns, output_patterns, piece_result)
 
             evaluation_result[piece] = piece_result
 
         return evaluation_result
+
+    @staticmethod
+    def __compute_establishment_scores(gt_patterns, output_patterns, piece_result):
+        est_matrix = mirex.establishment_matrix(gt_patterns, output_patterns)
+        p_est = mirex.establishment_precision(est_matrix)
+        piece_result[Evaluator.EST_PRECISION] = p_est
+        r_est = mirex.establishment_recall(est_matrix)
+        piece_result[Evaluator.EST_RECALL] = r_est
+        piece_result[Evaluator.EST_F_SCORE] = mirex.f_score(p_est, r_est)
+
+    @staticmethod
+    def __compute_three_layer_scores(gt_patterns, output_patterns, piece_result):
+        tl_matrix = mirex.layer_two_f_score_matrix(gt_patterns, output_patterns)
+        p_tl = mirex.three_layer_precision(tl_matrix)
+        piece_result[Evaluator.TL_PRECISION] = p_tl
+        r_tl = mirex.three_layer_recall(tl_matrix)
+        piece_result[Evaluator.TL_RECALL] = r_tl
+        piece_result[Evaluator.TL_F_SCORE] = mirex.f_score(p_tl, r_tl)
