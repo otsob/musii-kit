@@ -1,3 +1,5 @@
+from concurrent.futures import ProcessPoolExecutor
+
 import musii_kit.pattern_data.mirex_metrics as mirex
 from musii_kit.pattern_data.pattern_set import PatternSet
 
@@ -16,13 +18,14 @@ class Evaluator:
     TL_RECALL = 'three-layer_recall'
     TL_F_SCORE = 'three-layer_F1'
 
-    def __init__(self, ground_truth: PatternSet):
+    def __init__(self, ground_truth: PatternSet, process_count=8):
         """
         Creates a new evaluator.
 
         :param ground_truth: the ground truth against which the evaluator computes the metrics
         """
         self._ground_truth = ground_truth
+        self._process_count = process_count
 
     @staticmethod
     def __group_by_composition(dataset: PatternSet):
@@ -50,32 +53,46 @@ class Evaluator:
 
         evaluation_result = {}
 
-        for piece in common_pieces:
-            gt_patterns = ground_truth[piece][1]
-            output_patterns = evaluated_data[piece][1]
+        with ProcessPoolExecutor(max_workers=self._process_count) as executor:
+            piece_result_futures = {}
+            for piece in common_pieces:
+                gt_patterns = ground_truth[piece][1]
+                output_patterns = evaluated_data[piece][1]
 
-            piece_result = {}
-            Evaluator.__compute_establishment_scores(gt_patterns, output_patterns, piece_result)
-            Evaluator.__compute_three_layer_scores(gt_patterns, output_patterns, piece_result)
+                piece_result_futures[piece] = dispatch_piece_result_computations(executor, gt_patterns, output_patterns)
 
-            evaluation_result[piece] = piece_result
+            for piece in piece_result_futures:
+                evaluation_result[piece] = {}
+
+                for piece_future in piece_result_futures[piece]:
+                    evaluation_result[piece].update(piece_future.result())
 
         return evaluation_result
 
-    @staticmethod
-    def __compute_establishment_scores(gt_patterns, output_patterns, piece_result):
-        est_matrix = mirex.establishment_matrix(gt_patterns, output_patterns)
-        p_est = mirex.establishment_precision(est_matrix)
-        piece_result[Evaluator.EST_PRECISION] = p_est
-        r_est = mirex.establishment_recall(est_matrix)
-        piece_result[Evaluator.EST_RECALL] = r_est
-        piece_result[Evaluator.EST_F_SCORE] = mirex.f_score(p_est, r_est)
 
-    @staticmethod
-    def __compute_three_layer_scores(gt_patterns, output_patterns, piece_result):
-        tl_matrix = mirex.layer_two_f_score_matrix(gt_patterns, output_patterns)
-        p_tl = mirex.three_layer_precision(tl_matrix)
-        piece_result[Evaluator.TL_PRECISION] = p_tl
-        r_tl = mirex.three_layer_recall(tl_matrix)
-        piece_result[Evaluator.TL_RECALL] = r_tl
-        piece_result[Evaluator.TL_F_SCORE] = mirex.f_score(p_tl, r_tl)
+def dispatch_piece_result_computations(executor, gt_patterns, output_patterns):
+    result_futures = [executor.submit(compute_establishment_scores, gt_patterns, output_patterns),
+                      executor.submit(compute_three_layer_scores, gt_patterns, output_patterns)]
+    return result_futures
+
+
+def compute_establishment_scores(gt_patterns, output_patterns):
+    est_scores = {}
+    est_matrix = mirex.establishment_matrix(gt_patterns, output_patterns)
+    p_est = mirex.establishment_precision(est_matrix)
+    est_scores[Evaluator.EST_PRECISION] = p_est
+    r_est = mirex.establishment_recall(est_matrix)
+    est_scores[Evaluator.EST_RECALL] = r_est
+    est_scores[Evaluator.EST_F_SCORE] = mirex.f_score(p_est, r_est)
+    return est_scores
+
+
+def compute_three_layer_scores(gt_patterns, output_patterns):
+    tl_scores = {}
+    tl_matrix = mirex.layer_two_f_score_matrix(gt_patterns, output_patterns)
+    p_tl = mirex.three_layer_precision(tl_matrix)
+    tl_scores[Evaluator.TL_PRECISION] = p_tl
+    r_tl = mirex.three_layer_recall(tl_matrix)
+    tl_scores[Evaluator.TL_RECALL] = r_tl
+    tl_scores[Evaluator.TL_F_SCORE] = mirex.f_score(p_tl, r_tl)
+    return tl_scores
