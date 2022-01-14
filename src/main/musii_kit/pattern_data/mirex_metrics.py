@@ -61,4 +61,8 @@ def establishment_recall(est_matrix):
 def establishment_f1(est_matrix):
     p_est = establishment_precision(est_matrix)
     r_est = establishment_recall(est_matrix)
-    return (2 * p_est * r_est) / (p_est + r_est)
+    return basic_f1(p_est, r_est)
+
+
+def basic_f1(precision, recall):
+    return (2 * precision * recall) / (precision + recall)

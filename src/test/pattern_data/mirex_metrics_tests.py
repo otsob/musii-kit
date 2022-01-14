@@ -2,7 +2,7 @@ import unittest
 
 import numpy as np
 
-import musii_kit.data.mirex_metrics as mirex
+import musii_kit.pattern_data.mirex_metrics as mirex
 from musii_kit.point_set.point_set import Pattern, PatternOccurrences
 
 
