@@ -27,7 +27,10 @@ class PatternSet(Dataset):
         - patterns1.json
         - ...
         - patternsN.json
+
     where the CSV file and all patterns for the same composition are under the same directory.
+    Each JSON file is expected to contain all occurrences of a single pattern. The composition.csv name
+    must match the directory name exactly.
     """
 
     def __init__(self, path):
