@@ -1,4 +1,5 @@
 import json
+from typing import List
 
 import numpy as np
 
@@ -16,7 +17,7 @@ def write_patterns_to_json(pattern_occurrences: PatternOccurrences, output_path)
         json.dump(pattern_occurrences.to_dict(), outfile, indent=2)
 
 
-def read_patterns_from_json(input_path) -> PatternOccurrences:
+def read_patterns_from_json(input_path) -> List[PatternOccurrences]:
     """
     Read pattern occurrences from the given input path.
 
@@ -24,7 +25,11 @@ def read_patterns_from_json(input_path) -> PatternOccurrences:
     :return: the pattern occurrences
     """
     with open(input_path, 'r') as input_file:
-        return PatternOccurrences.from_dict(json.loads(input_file.read()))
+        json_content = json.loads(input_file.read())
+        if isinstance(json_content, list):
+            return [PatternOccurrences.from_dict(elem) for elem in json_content]
+        else:
+            return [PatternOccurrences.from_dict(json_content)]
 
 
 def save_to_csv(point_set: PointSet, path, decimal_places=2):
