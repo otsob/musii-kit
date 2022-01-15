@@ -51,6 +51,8 @@ class Evaluator:
         evaluated_data = Evaluator.__group_by_composition(dataset)
         common_pieces = ground_truth.keys() & evaluated_data.keys()
 
+        Evaluator.print_excluded_pieces(common_pieces, evaluated_data, ground_truth)
+
         evaluation_result = {}
 
         with ProcessPoolExecutor(max_workers=self._process_count) as executor:
@@ -68,6 +70,15 @@ class Evaluator:
                     evaluation_result[piece].update(piece_future.result())
 
         return evaluation_result
+
+    @staticmethod
+    def print_excluded_pieces(common_pieces, evaluated_data, ground_truth):
+        excluded_gt_pieces = set(ground_truth.keys()).difference(common_pieces)
+        excluded_evaluation_pieces = set(evaluated_data.keys()).difference(common_pieces)
+        if excluded_gt_pieces:
+            print(f'Ground truth pieces not found in given dataset {excluded_gt_pieces}')
+        if excluded_evaluation_pieces:
+            print(f'Pieces in given dataset not found in ground truth {excluded_evaluation_pieces}')
 
 
 def dispatch_piece_result_computations(executor, gt_patterns, output_patterns):
