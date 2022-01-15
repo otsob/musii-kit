@@ -35,8 +35,14 @@ class Pattern:
                    'data': self._pattern.tolist()}
         return as_dict
 
+    def points(self):
+        return self._pattern
+
     def __str__(self):
         return f'[{self.label}; {self.source}; {self._data_type}: {self._pattern}]'
+
+    def __len__(self):
+        return self._pattern.shape[0]
 
     @staticmethod
     def from_dict(input_dict):
@@ -62,6 +68,21 @@ class PatternOccurrences:
                    'pattern': self.pattern.to_dict(),
                    'occurrences': list(map(lambda p: p.to_dict(), self.occurrences))}
         return as_dict
+
+    def tolist(self):
+        """ Returns the pattern and all of its occurrences as a list """
+        pattern_list = [self.pattern]
+        pattern_list.extend(self.occurrences)
+        return pattern_list
+
+    def __len__(self):
+        return len(self.occurrences) + 1
+
+    def __getitem__(self, item):
+        if item == 0:
+            return self.pattern
+
+        return self.occurrences[item - 1]
 
     def __str__(self):
         string_components = ['Piece:', self.piece, '\npattern: ', str(self.pattern), '\n', 'occurrences:\n']

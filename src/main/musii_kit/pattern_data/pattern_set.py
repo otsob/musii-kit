@@ -27,7 +27,10 @@ class PatternSet(Dataset):
         - patterns1.json
         - ...
         - patternsN.json
+
     where the CSV file and all patterns for the same composition are under the same directory.
+    Each JSON file is expected to contain all occurrences of a single pattern or all occurrences of all patterns
+    as a JSON list. The composition.csv name must match the directory name exactly.
     """
 
     def __init__(self, path):
@@ -61,12 +64,13 @@ class PatternSet(Dataset):
                     df = pd.read_csv(os.path.join(root, file), header=None)
                     compositions[file[0:-4]] = df.to_numpy()[:, 0:2]
                 if file.endswith('.json'):
-                    pat_occ = read_patterns_from_json(os.path.join(root, file))
-                    piece = pat_occ.piece
-                    if piece not in patterns:
-                        patterns[piece] = []
+                    pat_occurrences = read_patterns_from_json(os.path.join(root, file))
+                    for pat_occ in pat_occurrences:
+                        piece = pat_occ.piece
+                        if piece not in patterns:
+                            patterns[piece] = []
 
-                    patterns[piece].append(pat_occ)
+                        patterns[piece].append(pat_occ)
 
         return compositions, patterns
 

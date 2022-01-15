@@ -2,12 +2,12 @@ import os
 from pathlib import Path
 
 import pandas as pd
-from torch.utils.data import Dataset
 
+from musii_kit.pattern_data.pattern_set import PatternSet
 from musii_kit.point_set.point_set import Pattern, PatternOccurrences
 
 
-class JkuPdd(Dataset):
+class JkuPdd(PatternSet):
     """ JKU-PDD as a PyTorch compatible data set.
 
     In order to use this class, you need to download JKU-PDD and extract it to some path.
