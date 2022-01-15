@@ -92,3 +92,11 @@ class MirexMetricsTests(unittest.TestCase):
         self.assertEqual(1.0, mirex.three_layer_precision(f_score_mat))
         self.assertEqual(1.0, mirex.three_layer_recall(f_score_mat))
         self.assertEqual(1.0, mirex.three_layer_f_score(f_score_mat))
+
+    def test_occurrence_metrics(self):
+        patterns = [self.occ_a, self.occ_a]
+        # Simple sanity check test
+        occ_ind = mirex.occurrence_indices(patterns, patterns)
+        self.assertEqual(1.0, mirex.occurrence_precision(patterns, patterns, occ_ind))
+        self.assertEqual(1.0, mirex.occurrence_recall(patterns, patterns, occ_ind))
+        self.assertEqual(1.0, mirex.occurrence_f_score(patterns, patterns, occ_ind))

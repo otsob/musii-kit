@@ -115,3 +115,50 @@ def three_layer_f_score(l2_f_score_matrix):
     recall = three_layer_recall(l2_f_score_matrix)
 
     return f_score(precision, recall)
+
+
+# Occurrence scores
+
+def occurrence_indices(ground_truth: List[PatternOccurrences], output_patterns: List[PatternOccurrences],
+                       threshold=0.75):
+    est_matrix = establishment_matrix(ground_truth, output_patterns)
+    mask = (est_matrix >= threshold).astype(int)
+    indices = np.nonzero(mask)
+    return indices
+
+
+def __occurrence_score(ground_truth, occ_indices, output_patterns, axis):
+    occ_matrix = np.zeros((len(ground_truth), len(output_patterns)))
+    n_pairs = len(occ_indices[0])
+    for ind in range(n_pairs):
+        row = occ_indices[0][ind]
+        col = occ_indices[1][ind]
+
+        gt_pat = ground_truth[row]
+        pat = output_patterns[col]
+        occ_matrix[row, col] = np.mean(np.amax(score_matrix(gt_pat, pat), axis=axis))
+
+    axis_max_vals = np.amax(occ_matrix, axis=axis)
+    non_zero_max_vals = axis_max_vals[axis_max_vals != 0.0]
+
+    if non_zero_max_vals.size == 0:
+        return 0.0
+
+    return np.mean(non_zero_max_vals)
+
+
+def occurrence_precision(ground_truth: List[PatternOccurrences], output_patterns: List[PatternOccurrences],
+                         occ_indices):
+    return __occurrence_score(ground_truth, occ_indices, output_patterns, 0)
+
+
+def occurrence_recall(ground_truth: List[PatternOccurrences], output_patterns: List[PatternOccurrences],
+                      occ_indices):
+    return __occurrence_score(ground_truth, occ_indices, output_patterns, 1)
+
+
+def occurrence_f_score(ground_truth: List[PatternOccurrences], output_patterns: List[PatternOccurrences], occ_ind):
+    p_occ = occurrence_precision(ground_truth, output_patterns, occ_ind)
+    r_occ = occurrence_recall(ground_truth, output_patterns, occ_ind)
+
+    return f_score(p_occ, r_occ)
