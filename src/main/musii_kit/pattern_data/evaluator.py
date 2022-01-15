@@ -1,4 +1,7 @@
+from collections import defaultdict
 from concurrent.futures import ProcessPoolExecutor
+
+import pandas as pd
 
 import musii_kit.pattern_data.mirex_metrics as mirex
 from musii_kit.pattern_data.pattern_set import PatternSet
@@ -11,12 +14,17 @@ class Evaluator:
     the JkuPdd and PatternSet classes in this module.
      """
 
-    EST_RECALL = 'establishment_recall'
-    EST_PRECISION = 'establishment_precision'
-    EST_F_SCORE = 'establishment_F1'
-    TL_PRECISION = 'three-layer_precision'
-    TL_RECALL = 'three-layer_recall'
-    TL_F_SCORE = 'three-layer_F1'
+    PIECE = 'piece'
+
+    EST_RECALL = 'R_est'
+    EST_PRECISION = 'P_est'
+    EST_F_SCORE = 'F1_est'
+    TL_PRECISION = 'P_3L'
+    TL_RECALL = 'R_3L'
+    TL_F_SCORE = 'F1_3L'
+    OCC_PRECISION = 'P_occ'
+    OCC_RECALL = 'R_occ'
+    OCC_F_SCORE = 'F1_occ'
 
     def __init__(self, ground_truth: PatternSet, process_count=8):
         """
@@ -37,14 +45,13 @@ class Evaluator:
 
     def evaluate(self, dataset: PatternSet):
         """
-        Returns a dictionary where each piece in the ground truth data set is a key and the
-        value for that key is a dictionary of results.
+        Returns a pandas data frame of the results with a row for each evaluated piece and a column for each metric.
 
         If there are pieces that are not present in both the ground truth and the given dataset,
         they are ignored.
 
         :param dataset: the data set that is evaluated
-        :return: a dictionary of results grouped by piece in the ground truth.
+        :return: a pandas data frame of the results with a row for each evaluated piece and a column for each metric
         """
 
         ground_truth = Evaluator.__group_by_composition(self._ground_truth)
@@ -64,26 +71,43 @@ class Evaluator:
                 piece_result_futures[piece] = dispatch_piece_result_computations(executor, gt_patterns, output_patterns)
 
             for piece in piece_result_futures:
-                evaluation_result[piece] = {}
+                evaluation_result[piece] = {Evaluator.PIECE: piece}
 
                 for piece_future in piece_result_futures[piece]:
                     evaluation_result[piece].update(piece_future.result())
 
-        return evaluation_result
+        return Evaluator.__results_to_pandas(evaluation_result)
+
+    @staticmethod
+    def __results_to_pandas(evaluation_result):
+        """ Returns a pandas dataframe created from the dict of evaluation results """
+
+        sorted_pieces = sorted(evaluation_result.keys())
+        dict_dataframe = defaultdict(list)
+
+        for piece in sorted_pieces:
+            piece_dict = evaluation_result[piece]
+            for key in piece_dict:
+                dict_dataframe[key].append(piece_dict[key])
+
+        return pd.DataFrame.from_dict(dict_dataframe)
 
     @staticmethod
     def print_excluded_pieces(common_pieces, evaluated_data, ground_truth):
-        excluded_gt_pieces = set(ground_truth.keys()).difference(common_pieces)
-        excluded_evaluation_pieces = set(evaluated_data.keys()).difference(common_pieces)
+        excluded_gt_pieces = sorted(set(ground_truth.keys()).difference(common_pieces))
+        excluded_evaluation_pieces = sorted(set(evaluated_data.keys()).difference(common_pieces))
         if excluded_gt_pieces:
-            print(f'Ground truth pieces not found in given dataset {excluded_gt_pieces}')
+            listing = '\n\t'.join(excluded_gt_pieces)
+            print(f'Ground truth pieces not found in given dataset:\n\t{listing}')
         if excluded_evaluation_pieces:
-            print(f'Pieces in given dataset not found in ground truth {excluded_evaluation_pieces}')
+            listing = '\n\t'.join(excluded_evaluation_pieces)
+            print(f'Pieces in given dataset not found in ground truth:\n\t{listing}')
 
 
 def dispatch_piece_result_computations(executor, gt_patterns, output_patterns):
     result_futures = [executor.submit(compute_establishment_scores, gt_patterns, output_patterns),
-                      executor.submit(compute_three_layer_scores, gt_patterns, output_patterns)]
+                      executor.submit(compute_three_layer_scores, gt_patterns, output_patterns),
+                      executor.submit(compute_occurrence_scores, gt_patterns, output_patterns)]
     return result_futures
 
 
@@ -107,3 +131,15 @@ def compute_three_layer_scores(gt_patterns, output_patterns):
     tl_scores[Evaluator.TL_RECALL] = r_tl
     tl_scores[Evaluator.TL_F_SCORE] = mirex.f_score(p_tl, r_tl)
     return tl_scores
+
+
+def compute_occurrence_scores(gt_patterns, output_patterns):
+    occ_scores = {}
+    occ_ind = mirex.occurrence_indices(gt_patterns, output_patterns)
+    p_occ = mirex.occurrence_precision(gt_patterns, output_patterns, occ_ind)
+    occ_scores[Evaluator.OCC_PRECISION] = p_occ
+    r_occ = mirex.occurrence_recall(gt_patterns, output_patterns, occ_ind)
+    occ_scores[Evaluator.OCC_RECALL] = r_occ
+    occ_scores[Evaluator.OCC_F_SCORE] = mirex.f_score(p_occ, r_occ)
+
+    return occ_scores
