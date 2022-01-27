@@ -59,18 +59,21 @@ class PatternSet(Dataset):
         patterns = {}
 
         for root, _, files in os.walk(self._path):
+
+            pattern_list = []
+            composition = ''
+
             for file in files:
                 if file.endswith('.csv'):
                     df = pd.read_csv(os.path.join(root, file), header=None)
-                    compositions[file[0:-4]] = df.to_numpy()[:, 0:2]
+                    composition = file[0:-4]
+                    compositions[composition] = df.to_numpy()[:, 0:2]
                 if file.endswith('.json'):
                     pat_occurrences = read_patterns_from_json(os.path.join(root, file))
                     for pat_occ in pat_occurrences:
-                        piece = pat_occ.piece
-                        if piece not in patterns:
-                            patterns[piece] = []
+                        pattern_list.append(pat_occ)
 
-                        patterns[piece].append(pat_occ)
+            patterns[composition] = pattern_list
 
         return compositions, patterns
 
