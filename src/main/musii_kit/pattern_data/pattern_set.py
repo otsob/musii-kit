@@ -16,21 +16,12 @@ class PatternSet(Dataset):
     1: A 2-dimensional point set of the composition (onset, pitch)
     2: List of PatternOccurrences of all patterns annotated for the composition
 
-    The input directory is expected to have the following structure:
-    - composition_a
-        - composition_a.csv
-        - patterns1.json
-        - ...
-        - patternsN.json
-    - composition_b
-        - composition_b.csv
-        - patterns1.json
-        - ...
-        - patternsN.json
-
-    where the CSV file and all patterns for the same composition are under the same directory.
-    Each JSON file is expected to contain all occurrences of a single pattern or all occurrences of all patterns
-    as a JSON list. The composition.csv name must match the directory name exactly.
+    The input directory is expected to contain the pieces/compositions as csv files
+    and the patterns as JSON files. The input directory is expected to only contain
+    patterns from a single source (i.e. algorithm or annotator). The same input directory
+    can contain multiple pieces and pattern JSON files for those pieces.
+    The piece .csv file names must match exactly the piece names denoted in the JSON
+    files in order for the patterns to be associated with the correct piece.
     """
 
     def __init__(self, path):
@@ -50,7 +41,11 @@ class PatternSet(Dataset):
 
         compositions, patterns = self.__collect_compositions_and_patterns()
         for composition in compositions:
-            data.append((composition, compositions[composition], patterns[composition]))
+
+            if composition in patterns:
+                data.append((composition, compositions[composition], patterns[composition]))
+            else:
+                print(f'No patterns for composition {composition} found! Excluded the composition.')
 
         return data
 
@@ -59,23 +54,34 @@ class PatternSet(Dataset):
         patterns = {}
 
         for root, _, files in os.walk(self._path):
-
-            pattern_list = []
-            composition = ''
-
             for file in files:
                 if file.endswith('.csv'):
                     df = pd.read_csv(os.path.join(root, file), header=None)
-                    composition = file[0:-4]
-                    compositions[composition] = df.to_numpy()[:, 0:2]
+                    compositions[file[0:-4]] = df.to_numpy()[:, 0:2]
                 if file.endswith('.json'):
                     pat_occurrences = read_patterns_from_json(os.path.join(root, file))
                     for pat_occ in pat_occurrences:
-                        pattern_list.append(pat_occ)
+                        piece = pat_occ.piece
+                        if piece not in patterns:
+                            patterns[piece] = []
 
-            patterns[composition] = pattern_list
+                        patterns[piece].append(pat_occ)
 
         return compositions, patterns
+
+    def get_composition_size(self, piece_name):
+        for triplet in self._data:
+            if triplet[0] == piece_name:
+                return triplet[1].shape[0]
+
+        return None
+
+    def get_pattern_count(self, piece_name):
+        for triplet in self._data:
+            if triplet[0] == piece_name:
+                return len(triplet[2])
+
+        return None
 
     def __len__(self):
         return len(self._data)
