@@ -69,6 +69,20 @@ class PatternSet(Dataset):
 
         return compositions, patterns
 
+    def get_composition_size(self, piece_name):
+        for triplet in self._data:
+            if triplet[0] == piece_name:
+                return triplet[1].shape[0]
+
+        return None
+
+    def get_pattern_count(self, piece_name):
+        for triplet in self._data:
+            if triplet[0] == piece_name:
+                return len(triplet[2])
+
+        return None
+
     def __len__(self):
         return len(self._data)
 

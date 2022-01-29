@@ -73,6 +73,12 @@ class Evaluator:
             for piece in piece_result_futures:
                 evaluation_result[piece] = {Evaluator.PIECE: piece}
 
+                evaluation_result[piece].update({
+                    'N_points': dataset.get_composition_size(piece),
+                    'N_pattern': dataset.get_pattern_count(piece),
+                    'N_gt': self._ground_truth.get_pattern_count(piece)
+                })
+
                 for piece_future in piece_result_futures[piece]:
                     evaluation_result[piece].update(piece_future.result())
 
@@ -109,6 +115,7 @@ def dispatch_piece_result_computations(executor, gt_patterns, output_patterns):
                       executor.submit(compute_three_layer_scores, gt_patterns, output_patterns),
                       executor.submit(compute_occurrence_scores, gt_patterns, output_patterns, 0.75),
                       executor.submit(compute_occurrence_scores, gt_patterns, output_patterns, 0.5)]
+
     return result_futures
 
 
