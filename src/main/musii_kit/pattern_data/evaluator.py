@@ -107,7 +107,8 @@ class Evaluator:
 def dispatch_piece_result_computations(executor, gt_patterns, output_patterns):
     result_futures = [executor.submit(compute_establishment_scores, gt_patterns, output_patterns),
                       executor.submit(compute_three_layer_scores, gt_patterns, output_patterns),
-                      executor.submit(compute_occurrence_scores, gt_patterns, output_patterns)]
+                      executor.submit(compute_occurrence_scores, gt_patterns, output_patterns, 0.75),
+                      executor.submit(compute_occurrence_scores, gt_patterns, output_patterns, 0.5)]
     return result_futures
 
 
@@ -133,13 +134,13 @@ def compute_three_layer_scores(gt_patterns, output_patterns):
     return tl_scores
 
 
-def compute_occurrence_scores(gt_patterns, output_patterns):
+def compute_occurrence_scores(gt_patterns, output_patterns, threshold=0.75):
     occ_scores = {}
-    occ_ind = mirex.occurrence_indices(gt_patterns, output_patterns)
+    occ_ind = mirex.occurrence_indices(gt_patterns, output_patterns, threshold=threshold)
     p_occ = mirex.occurrence_precision(gt_patterns, output_patterns, occ_ind)
-    occ_scores[Evaluator.OCC_PRECISION] = p_occ
+    occ_scores[f'{Evaluator.OCC_PRECISION} (c={threshold})'] = p_occ
     r_occ = mirex.occurrence_recall(gt_patterns, output_patterns, occ_ind)
-    occ_scores[Evaluator.OCC_RECALL] = r_occ
-    occ_scores[Evaluator.OCC_F_SCORE] = mirex.f_score(p_occ, r_occ)
+    occ_scores[f'{Evaluator.OCC_RECALL} (c={threshold})'] = r_occ
+    occ_scores[f'{Evaluator.OCC_F_SCORE} (c={threshold})'] = mirex.f_score(p_occ, r_occ)
 
     return occ_scores
