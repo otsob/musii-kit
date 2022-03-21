@@ -77,11 +77,14 @@ class JkuPdd(PatternSet):
         for data_path in data_paths:
             patterns_path = os.path.join(data_path, 'repeatedPatterns')
             analysts = next(os.walk(patterns_path))[1]
-            if 'sectionalRepetitions' in analysts:
-                analysts.remove('sectionalRepetitions')
 
             composition = data_path.split('/')[-2] + '_' + data_path.split('/')[-1]
             pattern_occurrences = []
+
+            # For polyphonic corpus barlowAndMorgenstern should be
+            # excluded.
+            if 'polyphonic' in data_path and 'barlowAndMorgenstern' in analysts:
+                analysts.remove('barlowAndMorgenstern')
 
             for analyst in analysts:
                 analyst_path = os.path.join(patterns_path, analyst)
