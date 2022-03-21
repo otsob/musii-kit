@@ -96,7 +96,10 @@ class Evaluator:
             for key in piece_dict:
                 dict_dataframe[key].append(piece_dict[key])
 
-        return pd.DataFrame.from_dict(dict_dataframe)
+        df = pd.DataFrame.from_dict(dict_dataframe)
+        df.loc['Mean'] = df.mean(numeric_only=True)
+
+        return df
 
     @staticmethod
     def print_excluded_pieces(common_pieces, evaluated_data, ground_truth):
