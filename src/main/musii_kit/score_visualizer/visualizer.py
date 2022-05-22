@@ -1,5 +1,3 @@
-import os
-
 import music21 as m21
 from music21.environment import UserSettingsException
 
@@ -13,15 +11,31 @@ def set_muse_score_visualizer(mscore_path='/Applications/MuseScore 3.app/Content
                         For Windows the path is typically: r'C:\\Program Files (x86)\\MuseScore 3\\bin\\MuseScore.exe'
                         (with single backslashes)
     """
+    us = __get_m21_user_settings()
+    us['musescoreDirectPNGPath'] = mscore_path
+    us['musicxmlPath'] = mscore_path
+
+
+def __get_m21_user_settings():
     us = m21.environment.UserSettings()
     try:
         us.create()
     except UserSettingsException:
         # If path already exists, an exception is raised. The exception is ignored.
         pass
+    return us
 
-    us['musescoreDirectPNGPath'] = mscore_path
-    us['musicxmlPath'] = mscore_path
+
+def set_lilypond_visualizer(lilypond_path='/usr/local/opt/lilypond/bin/lilypond'):
+    """
+    Sets the path for using LilyPond as a visualizer.
+
+    :param lilypond_path: the path to the LilyPond executable. Defaults to macOS path.
+
+    """
+    us = __get_m21_user_settings()
+    us['lilypondPath'] = lilypond_path
+    us['musicxmlPath'] = lilypond_path
 
 
 def visualize(notation):
