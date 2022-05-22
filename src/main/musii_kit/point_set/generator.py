@@ -1,7 +1,8 @@
 import random
+
 import numpy as np
 
-from point_set.point_set import PointSet
+from musii_kit.point_set.point_set import PointSet
 
 
 def create_point_set_of_random_patterns(n, min_pattern_size, max_pattern_size, max_reps, dimensionality=2,
@@ -33,7 +34,7 @@ def create_point_set_of_random_patterns(n, min_pattern_size, max_pattern_size, m
         pattern = np.random.randint(value_range[0], value_range[1], (pattern_size, dimensionality))
         repetitions = random.randint(1, max_reps)
 
-        point_set[index:index+pattern_size] = pattern
+        point_set[index:index + pattern_size] = pattern
 
         for _ in range(0, repetitions):
             index += pattern_size
@@ -41,7 +42,8 @@ def create_point_set_of_random_patterns(n, min_pattern_size, max_pattern_size, m
                 break
 
             components = np.random.randint(value_range[0], value_range[1], (1, dimensionality))
-            translation = np.column_stack((np.repeat(components[0, 0], pattern_size), (np.repeat(components[0, 1], pattern_size))))
+            translation = np.column_stack(
+                (np.repeat(components[0, 0], pattern_size), (np.repeat(components[0, 1], pattern_size))))
             point_set[index:index + pattern_size] = pattern + translation
 
     return PointSet(replace_duplicates(point_set, value_range))
@@ -55,7 +57,8 @@ def replace_duplicates(point_set, value_range):
     dim = point_set.size[1]
     while unique_points.size != point_set.size:
         missing_row_count = point_set.shape[0] - unique_points.shape[0]
-        without_duplicates = np.stack(unique_points, np.random.randint(value_range[0], value_range[1], (missing_row_count, dim)))
+        without_duplicates = np.stack(unique_points,
+                                      np.random.randint(value_range[0], value_range[1], (missing_row_count, dim)))
         unique_points = np.unique(without_duplicates)
 
     return without_duplicates
@@ -99,4 +102,3 @@ def create_point_set_with_no_repeated_patterns(n, dimensionality=2):
         point_set[x, 1] = y
 
     return PointSet(point_set)
-
