@@ -1,5 +1,8 @@
 # MusiiKit: Musicology data analysis toolkit
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+![pull_request](https://github.com/otsob/musii-kit/actions/workflows/pull_request.yml/badge.svg)
+
 A collection of tools for computational musicology.
 
 ## Dependencies
