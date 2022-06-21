@@ -5,7 +5,7 @@ import numpy as np
 from musii_kit.point_set.point_set import Pattern, PatternOccurrences
 
 """
-Defines metrics used in MIREX 2017 competition for repeated patterns 
+Defines metrics used in MIREX 2017 competition for repeated patterns
 (see https://www.music-ir.org/mirex/wiki/2017:Discovery_of_Repeated_Themes_%26_Sections#Evaluation_Procedure).
 """
 

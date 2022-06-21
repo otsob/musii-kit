@@ -1,8 +1,11 @@
 [tool.poetry]
 name = "musii-kit"
 version = "0.1.0"
-description = ""
+description = "Collection of tools for computational musicology"
 authors = ["Otso Björklund <otso.bjorklund@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/otsob/musii-kit"
 
 [tool.poetry.dependencies]
 python = "3.8.*"
@@ -15,7 +18,8 @@ scipy = "^1.7.3"
 torch = "^1.10.0"
 
 [tool.poetry.dev-dependencies]
-pybuilder = "^0.13.3"
+pytest = "^7.1.0"
+flake8 = "^4.0.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
