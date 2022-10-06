@@ -22,7 +22,7 @@ class PointSet:
 class Pattern:
     """ Represents a point pattern """
 
-    def __init__(self, pattern_points, label: str, source: str, data_type='point_set_test'):
+    def __init__(self, pattern_points, label: str, source: str, data_type='point_set'):
         self._pattern = pattern_points
         self.label = label
         self.source = source
@@ -49,7 +49,7 @@ class Pattern:
         label = input_dict['label']
         source = input_dict['source']
         data_type = input_dict['data_type']
-        if data_type == 'point_set_test':
+        if data_type == 'point_set':
             points = np.array(input_dict['data'])
 
         return Pattern(points, label, source, data_type)
