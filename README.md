@@ -24,3 +24,10 @@ The exact packages used by musii-kit are defined in the [poetry.lock](./poetry.l
 
 Once all dependencies are installed in the virtual environment, run
 `./script/update_kernel.sh` instead to avoid running full install of all dependencies.
+
+## Running in a Docker container
+
+Musii-kit can also be run in a Docker container. The Docker images for musii-kit can be found
+on [GitHub container registry](https://github.com/otsob/musii-kit/pkgs/container/musii-kit),
+e.g. `ghcr.io/otsob/musii-kit:0.1`
+for version `0.1.x``
