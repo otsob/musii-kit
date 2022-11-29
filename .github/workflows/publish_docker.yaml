@@ -1,4 +1,4 @@
-name: Create and publish Docker image
+name: Master
 
 on:
   push:
@@ -9,12 +9,29 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.10.8
+      - uses: abatilo/actions-poetry@v2.0.0
+        with:
+          poetry-version: 1.2.2
+      - name: Install dependencies
+        run: poetry install
+      - name: Lint
+        run: poetry run flake8 --verbose
+      - name: Run tests
+        run: poetry run pytest --verbose
+
   build-and-push-image:
+    needs: build
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -33,3 +50,19 @@ jobs:
           file: docker/Dockerfile
           push: true
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:0.1
+
+  bump-version:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - name: Increment patch and push
+        run: |
+          git config --global user.name "GitHub Actions CI"
+          git config --global user.email "version.bump@users.noreply.github.com"
+          pip install bumpversion
+          bumpversion patch
+          git push origin master
