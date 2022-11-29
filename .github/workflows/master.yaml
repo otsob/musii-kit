@@ -52,7 +52,7 @@ jobs:
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:0.1
 
   bump-version:
-    needs: build
+    needs: build-and-push-image
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
