@@ -1,2 +1,2 @@
 #!/bin/sh
-python -m ipykernel install --user --name=musii-kit-0.1
+python -m ipykernel install --user --name=musii-kit-0.2
