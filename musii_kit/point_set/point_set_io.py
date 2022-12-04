@@ -41,3 +41,13 @@ def save_to_csv(point_set: PointSet, path, decimal_places=2):
     :param decimal_places: how many decimal places are used for the values
     """
     np.savetxt(path, point_set.points_array(), delimiter=', ', fmt=f'%.{decimal_places}f', header="x, y")
+
+
+def read_csv(path) -> PointSet:
+    """
+    Reads a point set from a csv file.
+
+    :param path: path to csv file with two columns
+    :return: a point set with the contents of the csv file
+    """
+    return PointSet(np.genfromtxt(path, delimiter=','))
