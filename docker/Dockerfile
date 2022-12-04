@@ -14,7 +14,7 @@ COPY README.md README.md
 COPY pyproject.toml pyproject.toml
 COPY poetry.lock poetry.lock
 COPY script/install_kernel.sh install_kernel.sh
-COPY examples/notebook /home/jupyter/notebooks
+COPY examples /home/jupyter/examples
 
 RUN useradd jupyter
 RUN chown -R jupyter /home/jupyter
@@ -22,7 +22,7 @@ RUN chown -R jupyter /home/jupyter
 USER jupyter
 RUN poetry run ./install_kernel.sh
 
-WORKDIR /home/jupyter/notebooks
+WORKDIR /home/jupyter/examples
 
 ENTRYPOINT ["poetry", "run", "jupyter", "notebook"]
 CMD ["--ip=0.0.0.0"]
