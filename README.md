@@ -9,7 +9,7 @@ greatly inspired by the example notebooks associated with the excellent book
 
 ## Dependencies
 
-* Python 3.8
+* Python 3.10
 * Jupyter Notebook
 * Poetry
 * MuseScore (version 3.6 recommended) or Lilypond for visualizing scores
