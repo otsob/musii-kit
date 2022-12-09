@@ -85,12 +85,15 @@ class Point2d:
 class PointSet2d:
     """ A 2-dimensional point set representation of a piece of music. """
 
-    def __init__(self, points: List[Point2d], piece_name=None, dtype=float):
+    def __init__(self, points: List[Point2d], piece_name=None, dtype=float, quarter_length=1.0,
+                 measure_line_positions=None):
         """
         Constructs new instance.
         :param points: the points in the point set as a numpy array
         :param piece_name: the name of the piece of music the point set represents
         :param dtype: the data type of the point components
+        :param quarter_length: the length of a quarter note in the time units used for measuring the onset time axis
+        :param measure_line_positions: optional list or array of the positions of measure lines in time
         """
 
         self.piece_name = piece_name
@@ -105,6 +108,9 @@ class PointSet2d:
             self._points[i, 0] = point.onset_time
             self._points[i, 1] = point.pitch_number
             self._points[i, 2] = point.raw_onset_time
+
+        self.quarter_length = quarter_length
+        self.measure_line_positions = measure_line_positions
 
     @staticmethod
     def from_numpy(points_array, piece_name=None):
