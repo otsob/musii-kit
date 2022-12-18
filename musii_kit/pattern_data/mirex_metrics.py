@@ -2,7 +2,7 @@ from typing import List
 
 import numpy as np
 
-from musii_kit.point_set.point_set import Pattern, PatternOccurrences
+from musii_kit.point_set.point_set import Pattern2d, PatternOccurrences2d
 
 """
 Defines metrics used in MIREX 2017 competition for repeated patterns
@@ -11,17 +11,17 @@ Defines metrics used in MIREX 2017 competition for repeated patterns
 
 
 def __intersection(ground_truth, pattern) -> set:
-    a_set = set([tuple(x) for x in ground_truth.points()])
-    b_set = set([tuple(x) for x in pattern.points()])
+    a_set = set([tuple(x) for x in ground_truth.as_numpy()])
+    b_set = set([tuple(x) for x in pattern.as_numpy()])
     return a_set & b_set
 
 
-def cardinality_score(ground_truth: Pattern, pattern: Pattern):
+def cardinality_score(ground_truth: Pattern2d, pattern: Pattern2d):
     return len(__intersection(ground_truth, pattern)) / max(len(ground_truth), len(pattern))
 
 
 # Establishment scores
-def score_matrix(ground_truth: PatternOccurrences, patterns: PatternOccurrences, score=cardinality_score):
+def score_matrix(ground_truth: PatternOccurrences2d, patterns: PatternOccurrences2d, score=cardinality_score):
     n_gt = len(ground_truth)
     n_pat = len(patterns)
 
@@ -34,7 +34,7 @@ def score_matrix(ground_truth: PatternOccurrences, patterns: PatternOccurrences,
     return scores
 
 
-def establishment_matrix(ground_truth: List[PatternOccurrences], patterns: List[PatternOccurrences]):
+def establishment_matrix(ground_truth: List[PatternOccurrences2d], patterns: List[PatternOccurrences2d]):
     n_gt = len(ground_truth)
     n_pat = len(patterns)
 
@@ -81,7 +81,7 @@ def __layer_one_f1(gt_pattern, output_pattern):
     return f_score(p_l1, r_l1)
 
 
-def __layer_two_f_score(gt_occurrences: PatternOccurrences, output_occurrences: PatternOccurrences):
+def __layer_two_f_score(gt_occurrences: PatternOccurrences2d, output_occurrences: PatternOccurrences2d):
     layer_one_f1_matrix = score_matrix(gt_occurrences, output_occurrences, score=__layer_one_f1)
     layer_two_precision = np.mean(np.amax(layer_one_f1_matrix, axis=0))
     layer_two_recall = np.mean(np.amax(layer_one_f1_matrix, axis=1))
@@ -89,7 +89,7 @@ def __layer_two_f_score(gt_occurrences: PatternOccurrences, output_occurrences: 
     return f_score(layer_two_precision, layer_two_recall)
 
 
-def layer_two_f_score_matrix(ground_truth: List[PatternOccurrences], output_patterns: List[PatternOccurrences]):
+def layer_two_f_score_matrix(ground_truth: List[PatternOccurrences2d], output_patterns: List[PatternOccurrences2d]):
     n_gt = len(ground_truth)
     n_pat = len(output_patterns)
 
@@ -119,7 +119,7 @@ def three_layer_f_score(l2_f_score_matrix):
 
 # Occurrence scores
 
-def occurrence_indices(ground_truth: List[PatternOccurrences], output_patterns: List[PatternOccurrences],
+def occurrence_indices(ground_truth: List[PatternOccurrences2d], output_patterns: List[PatternOccurrences2d],
                        threshold=0.75):
     est_matrix = establishment_matrix(ground_truth, output_patterns)
     mask = (est_matrix >= threshold).astype(int)
@@ -147,17 +147,17 @@ def __occurrence_score(ground_truth, occ_indices, output_patterns, axis):
     return np.mean(non_zero_max_vals)
 
 
-def occurrence_precision(ground_truth: List[PatternOccurrences], output_patterns: List[PatternOccurrences],
+def occurrence_precision(ground_truth: List[PatternOccurrences2d], output_patterns: List[PatternOccurrences2d],
                          occ_indices):
     return __occurrence_score(ground_truth, occ_indices, output_patterns, 0)
 
 
-def occurrence_recall(ground_truth: List[PatternOccurrences], output_patterns: List[PatternOccurrences],
+def occurrence_recall(ground_truth: List[PatternOccurrences2d], output_patterns: List[PatternOccurrences2d],
                       occ_indices):
     return __occurrence_score(ground_truth, occ_indices, output_patterns, 1)
 
 
-def occurrence_f_score(ground_truth: List[PatternOccurrences], output_patterns: List[PatternOccurrences], occ_ind):
+def occurrence_f_score(ground_truth: List[PatternOccurrences2d], output_patterns: List[PatternOccurrences2d], occ_ind):
     p_occ = occurrence_precision(ground_truth, output_patterns, occ_ind)
     r_occ = occurrence_recall(ground_truth, output_patterns, occ_ind)
 

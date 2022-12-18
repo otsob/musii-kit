@@ -2,7 +2,7 @@ import random
 
 import numpy as np
 
-from musii_kit.point_set.point_set import PointSet
+from musii_kit.point_set.point_set import PointSet2d
 
 
 def create_point_set_of_random_patterns(n, min_pattern_size, max_pattern_size, max_reps, dimensionality=2,
@@ -46,7 +46,7 @@ def create_point_set_of_random_patterns(n, min_pattern_size, max_pattern_size, m
                 (np.repeat(components[0, 0], pattern_size), (np.repeat(components[0, 1], pattern_size))))
             point_set[index:index + pattern_size] = pattern + translation
 
-    return PointSet(replace_duplicates(point_set, value_range))
+    return PointSet2d(replace_duplicates(point_set, value_range))
 
 
 def replace_duplicates(point_set, value_range):
@@ -78,7 +78,7 @@ def create_point_set_on_line(n, dimensionality=2):
 
     point_set = np.zeros((n, dimensionality), dtype=float)
     point_set[:, 0] = np.arange(0, n, 1.0, dtype=float)
-    return PointSet(point_set)
+    return PointSet2d(point_set)
 
 
 def create_point_set_with_no_repeated_patterns(n, dimensionality=2):
@@ -101,4 +101,4 @@ def create_point_set_with_no_repeated_patterns(n, dimensionality=2):
         point_set[x, 0] = x
         point_set[x, 1] = y
 
-    return PointSet(point_set)
+    return PointSet2d(point_set)
