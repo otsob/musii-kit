@@ -160,6 +160,27 @@ class PointSet2d:
 
         return PointsIter2d(self)
 
+    def __and__(self, other):
+        i = 0
+        j = 0
+
+        common_points = []
+
+        while i < len(self) and j < len(other):
+            this = self[i]
+            that = other[j]
+
+            if this == that:
+                common_points.append(this)
+                i += 1
+                j += 1
+            elif this < that:
+                i += 1
+            else:
+                j += 1
+
+        return PointSet2d(common_points, self.piece_name, self._dtype)
+
 
 class Pattern2d(PointSet2d):
     """ Represents a pattern in a 2-dimensional point-set representation of music. """

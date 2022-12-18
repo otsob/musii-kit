@@ -44,6 +44,17 @@ class TestPointSet2d:
                                         [2.0, 20.0, 2.0],
                                         [2.0, 21.0, 2.0]]))
 
+    def test_given_point_sets_with_common_point_intersection_not_empty(self):
+        point_set_a = PointSet2d(self.test_points, piece_name='Test piece', dtype=float)
+        points_b = self.test_points[1:3]
+        points_b.append(Point2d(30.0, 12.0))
+        point_set_b = PointSet2d(points_b, piece_name='Test piece', dtype=float)
+
+        intersection = point_set_a & point_set_b
+        assert 2 == len(intersection)
+        assert Point2d(0.0, 21.0) == intersection[0]
+        assert Point2d(1.0, 20.0) == intersection[1]
+
 
 class TestPointPattern2d:
     test_points = [Point2d(1.0000001, 20.0), Point2d(1.0, 20.0), Point2d(0.0, 21.0)]

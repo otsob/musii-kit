@@ -17,7 +17,7 @@ def __intersection(ground_truth, pattern) -> set:
 
 
 def cardinality_score(ground_truth: Pattern2d, pattern: Pattern2d):
-    return len(__intersection(ground_truth, pattern)) / max(len(ground_truth), len(pattern))
+    return len(ground_truth & pattern) / max(len(ground_truth), len(pattern))
 
 
 # Establishment scores
@@ -74,7 +74,7 @@ def f_score(precision, recall):
 
 # Three layer scores
 def __layer_one_f1(gt_pattern, output_pattern):
-    intersection_size = len(__intersection(gt_pattern, output_pattern))
+    intersection_size = len(gt_pattern & output_pattern)
     p_l1 = intersection_size / len(output_pattern)
     r_l1 = intersection_size / len(gt_pattern)
 
