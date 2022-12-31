@@ -1,27 +1,27 @@
 import numpy as np
 
 import musii_kit.pattern_data.mirex_metrics as mirex
-from musii_kit.point_set.point_set import Pattern, PatternOccurrences
+from musii_kit.point_set.point_set import Pattern2d, PatternOccurrences2d
 
 
 class TestMirexMetrics:
     piece = 'Test piece'
-    pattern_a = Pattern(np.array([[1.0, 2.0], [2.0, 2.0], [3.0, 4.0]]), 'A', 'Analyst')
-    pattern_b = Pattern(np.array([[1.5, 2.0], [2.0, 2.0], [3.0, 4.0], [5.0, 6.0]]), 'B', 'Analyst')
+    pattern_a = Pattern2d.from_numpy(np.array([[1.0, 2.0], [2.0, 2.0], [3.0, 4.0]]), 'A', 'Analyst')
+    pattern_b = Pattern2d.from_numpy(np.array([[1.5, 2.0], [2.0, 2.0], [3.0, 4.0], [5.0, 6.0]]), 'B', 'Analyst')
 
-    occ_a = PatternOccurrences(piece, pattern_a,
-                               [Pattern(pattern_a.points() + np.array([10.0, 2.0]),
-                                        'A', 'Analyst'),
-                                Pattern(pattern_a.points() + np.array([20.0, 2.0]),
-                                        'A', 'Analyst')])
+    occ_a = PatternOccurrences2d(piece, pattern_a,
+                                 [Pattern2d.from_numpy(pattern_a.as_numpy() + np.array([10.0, 2.0, 10.0]),
+                                                       'A', 'Analyst'),
+                                  Pattern2d.from_numpy(pattern_a.as_numpy() + np.array([20.0, 2.0, 20.0]),
+                                                       'A', 'Analyst')])
 
-    occ_b = PatternOccurrences(piece, pattern_b,
-                               [Pattern(pattern_b.points() + np.array([10.0, 2.0]),
-                                        'B', 'Analyst'),
-                                Pattern(pattern_b.points() + np.array([20.0, 2.0]),
-                                        'B', 'Analyst'),
-                                Pattern(pattern_b.points() + np.array([30.0, 2.0]),
-                                        'B', 'Analyst')])
+    occ_b = PatternOccurrences2d(piece, pattern_b,
+                                 [Pattern2d.from_numpy(pattern_b.as_numpy() + np.array([10.0, 2.0, 10.0]),
+                                                       'B', 'Analyst'),
+                                  Pattern2d.from_numpy(pattern_b.as_numpy() + np.array([20.0, 2.0, 20.0]),
+                                                       'B', 'Analyst'),
+                                  Pattern2d.from_numpy(pattern_b.as_numpy() + np.array([30.0, 2.0, 30.0]),
+                                                       'B', 'Analyst')])
 
     def test_cardinality_score(self):
         cardinality_score = mirex.cardinality_score(self.pattern_a, self.pattern_b)

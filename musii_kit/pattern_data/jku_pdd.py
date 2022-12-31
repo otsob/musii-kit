@@ -4,7 +4,7 @@ from pathlib import Path
 import pandas as pd
 
 from musii_kit.pattern_data.pattern_set import PatternSet
-from musii_kit.point_set.point_set import Pattern, PatternOccurrences
+from musii_kit.point_set.point_set import Pattern2d, PatternOccurrences2d
 
 
 class JkuPdd(PatternSet):
@@ -55,7 +55,7 @@ class JkuPdd(PatternSet):
                 occ_csv_path = os.path.join(occurrences_csv_path, occ_file)
                 occurrences.append(self.__read_pattern(occ_csv_path, label, analyst))
 
-            patterns.append(PatternOccurrences(composition, occurrences[0], occurrences[1:]))
+            patterns.append(PatternOccurrences2d(composition, occurrences[0], occurrences[1:]))
 
         return patterns
 
@@ -63,7 +63,7 @@ class JkuPdd(PatternSet):
         points_pd = pd.read_csv(pattern_csv_path, header=None)
         points = points_pd.to_numpy()
 
-        return Pattern(points, label=label, source=analyst)
+        return Pattern2d.from_numpy(points, label=label, source=analyst)
 
     def __get_composition_point_set(self, data_path):
         csv_path = list(filter(lambda path: path.endswith('csv'), next(os.walk(os.path.join(data_path, 'csv')))[2]))[0]
