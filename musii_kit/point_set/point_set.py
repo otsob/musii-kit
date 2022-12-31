@@ -321,6 +321,11 @@ class Plot:
         if self.measure_lines:
             max_pitch = np.max(points[:, 1])
             min_pitch = np.min(points[:, 1])
+
+            if min_pitch == max_pitch:
+                max_pitch += 1.0
+                min_pitch -= 1.0
+
             plt.vlines(self.measure_lines, min_pitch, max_pitch, colors='k', linestyles='dotted', alpha=0.25)
 
         for pattern_with_color in self._patterns:
