@@ -101,10 +101,20 @@ def _extract_piece_name(score):
     return piece_name
 
 
+def _is_note_onset(elem):
+    if not isinstance(elem, m21.note.Note):
+        return False
+
+    if elem.tie:
+        return elem.tie.type != 'stop' and elem.tie.type != 'continue'
+
+    return True
+
+
 def _read_elem_to_points(elem, measure_offset, points):
-    if isinstance(elem, m21.note.Note):
+    if _is_note_onset(elem):
         points.append(Point2d(measure_offset + elem.offset, elem.pitch.ps))
     if isinstance(elem, m21.chord.Chord) and not isinstance(elem, m21.harmony.ChordSymbol):
         for note in elem:
-            if isinstance(note, m21.note.Note):
+            if _is_note_onset(note):
                 points.append(Point2d(measure_offset + elem.offset, note.pitch.ps))
