@@ -8,7 +8,7 @@
     <creator type="composer">Composer / arranger</creator>
     <encoding>
       <software>MuseScore 4.0.0</software>
-      <encoding-date>2022-12-30</encoding-date>
+      <encoding-date>2023-01-06</encoding-date>
       <supports element="accidental" type="yes"/>
       <supports element="beam" type="yes"/>
       <supports element="print" attribute="new-page" type="no"/>
@@ -156,15 +156,27 @@
           <octave>3</octave>
           </pitch>
         <duration>6</duration>
+        <tie type="start"/>
         <voice>2</voice>
         <type>half</type>
         <stem>down</stem>
+        <notations>
+          <tied type="start"/>
+          </notations>
         </note>
       <note>
-        <rest/>
+        <pitch>
+          <step>B</step>
+          <octave>3</octave>
+          </pitch>
         <duration>6</duration>
+        <tie type="stop"/>
         <voice>2</voice>
         <type>half</type>
+        <stem>down</stem>
+        <notations>
+          <tied type="stop"/>
+          </notations>
         </note>
       <barline location="right">
         <bar-style>light-heavy</bar-style>
