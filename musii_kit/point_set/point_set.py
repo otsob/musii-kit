@@ -1,5 +1,6 @@
 from typing import List
 
+import music21 as m21
 import numpy as np
 from matplotlib import pyplot as plt
 
@@ -111,6 +112,71 @@ class PointSet2d:
 
         self.quarter_length = quarter_length
         self.measure_line_positions = measure_line_positions
+
+    @staticmethod
+    def from_score(score: m21.stream.Score):
+        """
+        Returns a point-set created from the given music21 score.
+
+        :param score: a music21 score
+        :return: a point-set created from the given score
+        """
+
+        measure_line_positions = []
+        first_staff = True
+        points = []
+
+        for staff in score.parts:
+
+            measure_offset = 0.0
+
+            for measure in filter(lambda m: isinstance(m, m21.stream.base.Measure), staff):
+                for elem in measure:
+                    PointSet2d._read_elem_to_points(elem, measure_offset, points)
+
+                    if isinstance(elem, m21.stream.Voice):
+                        for e in elem:
+                            PointSet2d._read_elem_to_points(e, measure_offset, points)
+
+                if first_staff:
+                    measure_line_positions.append(measure_offset)
+
+                measure_offset += measure.quarterLength
+
+            if first_staff:
+                measure_line_positions.append(measure_offset)
+
+            first_staff = False
+
+        return PointSet2d(points, PointSet2d._extract_piece_name(score), dtype=float, quarter_length=1.0,
+                          measure_line_positions=measure_line_positions)
+
+    @staticmethod
+    def _extract_piece_name(score):
+        piece_name = None
+        name_elem = next(filter(lambda e: hasattr(e, 'movementName'), score.elements))
+        if name_elem:
+            piece_name = name_elem.movementName
+        return piece_name
+
+    @staticmethod
+    def _is_note_onset(elem):
+        if not isinstance(elem, m21.note.Note):
+            return False
+
+        if elem.tie:
+            return elem.tie.type != 'stop' and elem.tie.type != 'continue'
+
+        return True
+
+    @staticmethod
+    def _read_elem_to_points(elem, measure_offset, points):
+        if PointSet2d._is_note_onset(elem):
+            points.append(Point2d(measure_offset + elem.offset, elem.pitch.ps))
+        if isinstance(elem, m21.chord.Chord) and not isinstance(elem, m21.harmony.ChordSymbol):
+            for note in elem:
+                if PointSet2d._is_note_onset(note):
+                    points.append(Point2d(measure_offset + elem.offset, note.pitch.ps))
 
     @staticmethod
     def from_numpy(points_array, piece_name=None):
