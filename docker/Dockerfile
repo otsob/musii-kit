@@ -7,7 +7,7 @@ RUN apt-get update && apt-get install musescore -y
 ENV MUSE_SCORE_PATH=/usr/bin/mscore
 
 # Install poetry
-RUN pip install 'poetry==1.2.2'
+RUN pip install 'poetry==1.4.1'
 
 COPY musii_kit musii_kit
 COPY README.md README.md
@@ -20,6 +20,7 @@ RUN useradd jupyter
 RUN chown -R jupyter /home/jupyter
 
 USER jupyter
+RUN poetry config installer.modern-installation false
 RUN poetry run ./install_kernel.sh
 
 WORKDIR /home/jupyter/examples
