@@ -1,8 +1,8 @@
-name: Master
+name: Main
 
 on:
   push:
-    branches: [ 'master' ]
+    branches: [ 'main' ]
 
 env:
   REGISTRY: ghcr.io
@@ -67,4 +67,4 @@ jobs:
           git config --global user.email "version.bump@users.noreply.github.com"
           pip install bumpversion
           bumpversion patch
-          git push origin master
+          git push origin main
