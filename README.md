@@ -23,11 +23,7 @@ The exact packages used by musii-kit are defined in the [poetry.lock](./poetry.l
 2. Run `./script/install_kernel.sh`
 
 Once all dependencies are installed in the virtual environment, run
-`./script/update_kernel.sh` instead to avoid running full installation of all dependencies.
-
-Some dependencies are optional and can be installed as extras by running:
-`poetry install --extras <extra>` for a single extra,
-or `poetry install --all-extra` for all extras.
+`./script/update_kernel.sh` instead to avoid running full install of all dependencies.
 
 ## Running in a Docker container
 
