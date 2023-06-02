@@ -1811,7 +1811,7 @@ testing = ["pytest", "pytest-benchmark"]
 
 [[package]]
 name = "posemirpy"
-version = "0.2.11"
+version = "0.3.0"
 description = "Python bindings for posemir"
 category = "main"
 optional = false
