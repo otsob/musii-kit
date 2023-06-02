@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "posemirpy"
+version = "0.2.11"
+description = "Python bindings for posemir"
+authors = ["Otso Björklund <otso.bjorklund@gmail.com>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+
+[tool.poetry.dev-dependencies]
+maturin = "^1.0.1"
+
+[build-system]
+requires = ["maturin>=1.0"]
+build-backend = "maturin"
