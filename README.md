@@ -13,6 +13,7 @@ greatly inspired by the example notebooks associated with the excellent book
 * Jupyter Notebook
 * Poetry
 * MuseScore (version 3.6 recommended) or Lilypond for visualizing scores
+* Rust (for `posemirpy`)
 * [Bump2version](https://pypi.org/project/bump2version/) for version bumping
 
 The exact packages used by musii-kit are defined in the [poetry.lock](./poetry.lock) file.
@@ -20,10 +21,7 @@ The exact packages used by musii-kit are defined in the [poetry.lock](./poetry.l
 ## Installation
 
 1. Activate virtual environment by running `poetry shell` at the root of this repository.
-2. Run `./script/install_kernel.sh`
-
-Once all dependencies are installed in the virtual environment, run
-`./script/update_kernel.sh` instead to avoid running full install of all dependencies.
+2. Run `./install_kernel.sh`
 
 ## Running in a Docker container
 
