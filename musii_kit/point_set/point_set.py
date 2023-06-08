@@ -117,6 +117,22 @@ class PointSet2d:
     def chromatic_pitch(m21_pitch):
         return m21_pitch.ps
 
+    __steps = {'C': 0, 'D': 1, 'E': 2, 'F': 3, 'G': 4, 'A': 5, 'B': 6}
+
+    @staticmethod
+    def morphetic_pitch(m21_pitch):
+        """ Returns the morphetic pitch number of the given pitch so that the morphetic
+        pitch is aligned with MIDI pitch numbers at C4 (60). This convention is used to match
+        the morphetic numbering used in the JKU-PDD dataset. """
+
+        oct = m21_pitch.octave * 7
+        step = PointSet2d.__steps[m21_pitch.step]
+
+        # Shift is used to get the morphetic pitch aligned so that C4 in morphetic
+        # equals C4 in MIDI (60).
+        shift = 32
+
+        return oct + step + shift
 
     @staticmethod
     def from_score(score: m21.stream.Score, pitch_extractor=chromatic_pitch):

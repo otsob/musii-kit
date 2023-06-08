@@ -149,7 +149,7 @@ class TestPoint2d:
 
 class TestPointSetIO:
 
-    def test_read_point_set_from_musicxml(self):
+    def test_read_chromatic_point_set_from_musicxml(self):
         test_path = Path(os.path.dirname(os.path.realpath(__file__)))
         point_set = read_musicxml(test_path / 'resources/test-point-set.musicxml')
 
@@ -168,6 +168,37 @@ class TestPointSetIO:
                                Point2d(4.0, 48.0),
                                Point2d(4.0, 52.0),
                                Point2d(4.0, 55.0)],
+                              piece_name='test-point-set.musicxml',
+                              quarter_length=1.0,
+                              measure_line_positions=[0.0, 4.0, 8.0])
+
+        assert np.array_equal(expected.as_numpy()[:, 0], point_set.as_numpy()[:, 0])
+        assert np.array_equal(expected.as_numpy()[:, 1], point_set.as_numpy()[:, 1])
+
+        assert point_set.piece_name == expected.piece_name
+        assert point_set.measure_line_positions == expected.measure_line_positions
+        assert point_set.quarter_length == expected.quarter_length
+
+    def test_read_morphetic_point_set_from_musicxml(self):
+        test_path = Path(os.path.dirname(os.path.realpath(__file__)))
+        point_set = read_musicxml(test_path / 'resources/test-point-set.musicxml',
+                                  pitch_extractor=PointSet2d.morphetic_pitch)
+
+        expected = PointSet2d([Point2d(0.0, 60.0),
+                               Point2d(2.0, 60.0),
+
+                               Point2d(4.0, 59.0),
+                               Point2d(4.0, 67.0),
+                               Point2d(4.33333333, 68.0),
+                               Point2d(4.66666666, 69.0),
+
+                               Point2d(0.0, 60.0),
+                               Point2d(2.0, 61.0),
+
+                               Point2d(2.0, 57.0),
+                               Point2d(4.0, 53.0),
+                               Point2d(4.0, 55.0),
+                               Point2d(4.0, 57.0)],
                               piece_name='test-point-set.musicxml',
                               quarter_length=1.0,
                               measure_line_positions=[0.0, 4.0, 8.0])
