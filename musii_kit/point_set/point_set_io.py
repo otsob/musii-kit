@@ -54,11 +54,12 @@ def read_csv(path) -> PointSet2d:
     return PointSet2d.from_numpy(np.genfromtxt(path, delimiter=','))
 
 
-def read_musicxml(path) -> PointSet2d:
+def read_musicxml(path, pitch_extractor=PointSet2d.chromatic_pitch) -> PointSet2d:
     """
     Reads a point set from a MusicXML file.
 
     :param path: path to MusicXML file
+    :param pitch_extractor: the function used to map a music21 pitch to a number
     :return: a point set with the contents of the MusicXML file
     """
-    return PointSet2d.from_score(m21.converter.parse(path))
+    return PointSet2d.from_score(m21.converter.parse(path), pitch_extractor)

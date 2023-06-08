@@ -114,11 +114,17 @@ class PointSet2d:
         self.measure_line_positions = measure_line_positions
 
     @staticmethod
-    def from_score(score: m21.stream.Score):
+    def chromatic_pitch(m21_pitch):
+        return m21_pitch.ps
+
+
+    @staticmethod
+    def from_score(score: m21.stream.Score, pitch_extractor=chromatic_pitch):
         """
         Returns a point-set created from the given music21 score.
 
         :param score: a music21 score
+        :param pitch_extractor: the function used to map a music21 pitch to a number
         :return: a point-set created from the given score
         """
 
@@ -132,11 +138,11 @@ class PointSet2d:
 
             for measure in filter(lambda m: isinstance(m, m21.stream.base.Measure), staff):
                 for elem in measure:
-                    PointSet2d._read_elem_to_points(elem, measure_offset, points)
+                    PointSet2d._read_elem_to_points(elem, measure_offset, points, pitch_extractor)
 
                     if isinstance(elem, m21.stream.Voice):
                         for e in elem:
-                            PointSet2d._read_elem_to_points(e, measure_offset, points)
+                            PointSet2d._read_elem_to_points(e, measure_offset, points, pitch_extractor)
 
                 if first_staff:
                     measure_line_positions.append(measure_offset)
@@ -170,13 +176,13 @@ class PointSet2d:
         return True
 
     @staticmethod
-    def _read_elem_to_points(elem, measure_offset, points):
+    def _read_elem_to_points(elem, measure_offset, points, pitch_extractor):
         if PointSet2d._is_note_onset(elem):
-            points.append(Point2d(measure_offset + elem.offset, elem.pitch.ps))
+            points.append(Point2d(measure_offset + elem.offset, pitch_extractor(elem.pitch)))
         if isinstance(elem, m21.chord.Chord) and not isinstance(elem, m21.harmony.ChordSymbol):
             for note in elem:
                 if PointSet2d._is_note_onset(note):
-                    points.append(Point2d(measure_offset + elem.offset, note.pitch.ps))
+                    points.append(Point2d(measure_offset + elem.offset, pitch_extractor(note.pitch)))
 
     @staticmethod
     def from_numpy(points_array, piece_name=None):
