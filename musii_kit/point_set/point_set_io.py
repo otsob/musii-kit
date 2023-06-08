@@ -44,14 +44,19 @@ def save_to_csv(point_set: PointSet2d, path, decimal_places=2):
     np.savetxt(path, point_set.as_numpy(), delimiter=', ', fmt=f'%.{decimal_places}f', header="x, y")
 
 
-def read_csv(path) -> PointSet2d:
+def read_csv(path, onset_column=0, pitch_column=1, skip_header=0, delimiter=',') -> PointSet2d:
     """
     Reads a point set from a csv file.
 
     :param path: path to csv file with two columns
+    :param onset_column: index of column used for onset values
+    :param pitch_column: index of column used for pitch value
+    :param skip_header: skip_header paramater for numpy
+    :param delimiter: delimiter param for numpy
     :return: a point set with the contents of the csv file
     """
-    return PointSet2d.from_numpy(np.genfromtxt(path, delimiter=','))
+    array = np.genfromtxt(path, delimiter=delimiter, skip_header=skip_header)
+    return PointSet2d.from_numpy(np.column_stack((array[:, onset_column], array[:, pitch_column])))
 
 
 def read_musicxml(path, pitch_extractor=PointSet2d.chromatic_pitch) -> PointSet2d:
