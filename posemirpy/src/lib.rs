@@ -4,6 +4,7 @@ use posemir::discovery::siatec_c::SiatecC;
 use posemir::point_set::pattern::Pattern;
 use posemir::point_set::point::{Point, Point2DRf64};
 use posemir::point_set::set::PointSet;
+use posemir::point_set::tec::Tec;
 use pyo3::{pymodule, types::PyModule, PyResult, Python};
 
 
@@ -45,11 +46,10 @@ fn posemirpy(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
         }
 
         let point_set = PointSet::new(points);
-        let tecs = SiatecC{ max_ioi }.compute_tecs(&point_set);
 
-        let mut patterns: Vec<(&PyArray2<f64>, Vec<&PyArray2<f64>>)> = Vec::with_capacity(tecs.len());
+        let mut patterns: Vec<(&PyArray2<f64>, Vec<&PyArray2<f64>>)> = Vec::new();
 
-        for tec in &tecs {
+        let on_output = |tec: Tec<Point2DRf64>| {
             let pat_array = pattern_to_array(py, &tec.pattern);
             let mut translations = Vec::with_capacity(tec.translators.len());
             for t in &tec.translators {
@@ -57,7 +57,9 @@ fn posemirpy(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
             }
 
             patterns.push((pat_array, translations));
-        }
+        };
+
+        SiatecC{ max_ioi }.compute_tecs_to_output(&point_set, on_output);
 
         patterns
     }
