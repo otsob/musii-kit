@@ -403,5 +403,3 @@ class PatternOccurrences2d:
             occurrences.append(Pattern2d.from_dict(occ_dict))
 
         return PatternOccurrences2d(piece, pattern, occurrences)
-
-

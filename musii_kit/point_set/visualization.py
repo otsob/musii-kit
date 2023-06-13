@@ -1,7 +1,10 @@
+import math
+from copy import deepcopy
+
 import numpy as np
 from matplotlib import pyplot as plt
 
-from point_set.point_set import PointSet2d, Pattern2d
+from musii_kit.point_set.point_set import PointSet2d, Pattern2d, PatternOccurrences2d
 
 
 class Plot:
@@ -58,3 +61,83 @@ class Plot:
             plt.scatter(pattern.as_numpy()[:, 0], pattern.as_numpy()[:, 1], s=self.point_size * 2.0, c=color)
 
         plt.show()
+
+
+class ScoreVisualization:
+    """ Visualizes point-set pattern on a music21 score instance. The point-set given in the constructor must
+    have been created from a music21 score. """
+
+    def __init__(self, point_set: PointSet2d):
+        if not point_set.score:
+            raise ValueError("Cannot create a score visualization for a point-set with no score associated")
+
+        self._point_set = PointSet2d.from_score(deepcopy(point_set.score), point_set.pitch_extractor)
+        self._point_set.measure_line_positions = point_set.measure_line_positions
+        self._point_set.quarter_length = point_set.quarter_length
+        self._point_set.piece_name = point_set.piece_name
+        self._first_measure = math.inf
+        self._last_measure = -1
+        self._marked_notes = []
+
+    def mark_pattern(self, pattern: Pattern2d, color='red'):
+        """
+        Marks a pattern with the given color in the score.
+        :param pattern: the pattern that is marked
+        :param color: the color to use for the pattern
+        """
+        for p in pattern:
+            note = self._point_set.get_note(p)
+            note.style.color = color
+            self._marked_notes.append(note)
+            self._first_measure = min(self._first_measure, note.measureNumber)
+            self._last_measure = max(self._last_measure, note.measureNumber)
+
+    def mark_occurrences(self, pattern_occurrences: PatternOccurrences2d, pattern_color='red',
+                         occurrence_colors=['red']):
+        """
+        Mark pattern occurrences with the given colors. The colors are rotated from one occurrence to the next.
+        :param pattern_occurrences: the pattern occurrences to mark
+        :param pattern_color: the color used to mark the main pattern of the occurrences
+        :param occurrence_colors: the colors used for marking the pattern occurrences
+        """
+        self.mark_pattern(pattern_occurrences.pattern, pattern_color)
+
+        for i in range(len(pattern_occurrences.occurrences)):
+            self.mark_pattern(pattern_occurrences.occurrences[i], occurrence_colors[i % len(occurrence_colors)])
+
+    def __is_range_defined(self):
+        return self._first_measure < math.inf and self._last_measure >= 0
+
+    def get_selection(self):
+        """ Returns a selection from the score that only contains a range of measures that contains
+        marked patterns. """
+        if self.__is_range_defined():
+            selection = self._point_set.score.measures(self._first_measure, self._last_measure)
+            metadata = deepcopy(self._point_set.score.metadata)
+            metadata.movementName = f'{self._point_set.piece_name} measures {self._first_measure}-{self._last_measure}'
+            selection.metadata = metadata
+            return selection
+
+        return self._point_set.score
+
+    def get_measure_range(self):
+        """
+        Returns the range of measures the markings affect or None if no markings set.
+        :return: the range of measures the markings affect or None if no markings set
+        """
+        if self.__is_range_defined():
+            return self._first_measure, self._last_measure
+
+        return None
+
+    def reset(self):
+        """ Reset all markings from this score. """
+        for note in self._marked_notes:
+            note.style.color = None
+
+        self._marked_notes = []
+
+    @property
+    def score(self):
+        """  The music21 score instance containing the markings. """
+        return self._point_set.score
