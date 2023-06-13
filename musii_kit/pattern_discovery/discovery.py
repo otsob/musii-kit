@@ -14,6 +14,7 @@ def run_siatec_c(pointset: PointSet2d, max_ioi) -> List[PatternOccurrences2d]:
     """
     raw_output = posemir.run_siatec_c(pointset.as_numpy(), max_ioi)
     pattern_occurrences = []
+    piece = pointset.piece_name
 
     for arrays in raw_output:
         pattern = Pattern2d.from_numpy(arrays[0], label="", source=f'SIATEC-C ({max_ioi})')
@@ -21,6 +22,6 @@ def run_siatec_c(pointset: PointSet2d, max_ioi) -> List[PatternOccurrences2d]:
         for occ_array in arrays[1]:
             occurrences.append(Pattern2d.from_numpy(occ_array, label="", source=f'SIATEC-C ({max_ioi})'))
 
-        pattern_occurrences.append(PatternOccurrences2d('piece', pattern, occurrences))
+        pattern_occurrences.append(PatternOccurrences2d(piece, pattern, occurrences))
 
     return pattern_occurrences
