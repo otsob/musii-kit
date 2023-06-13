@@ -87,7 +87,7 @@ class PointSet2d:
     """ A 2-dimensional point set representation of a piece of music. """
 
     def __init__(self, points: List[Point2d], piece_name=None, dtype=float, quarter_length=1.0,
-                 measure_line_positions=None, score=None, points_to_notes=None):
+                 measure_line_positions=None, score=None, points_to_notes=None, pitch_extractor=None):
         """
         Constructs new instance.
         :param points: the points in the point set as a numpy array
@@ -114,6 +114,7 @@ class PointSet2d:
         self.measure_line_positions = measure_line_positions
         self._point_to_notes = points_to_notes
         self._score = score
+        self._pitch_extractor = pitch_extractor
 
     @staticmethod
     def chromatic_pitch(m21_pitch):
@@ -172,8 +173,10 @@ class PointSet2d:
 
             first_staff = False
 
-        return PointSet2d(points_and_notes.keys(), PointSet2d._extract_piece_name(score), dtype=float, quarter_length=1.0,
-                          measure_line_positions=measure_line_positions, score=score, points_to_notes=points_and_notes)
+        return PointSet2d(points_and_notes.keys(), PointSet2d._extract_piece_name(score), dtype=float,
+                          quarter_length=1.0,
+                          measure_line_positions=measure_line_positions, score=score, points_to_notes=points_and_notes,
+                          pitch_extractor=pitch_extractor)
 
     @staticmethod
     def _extract_piece_name(score):
@@ -212,6 +215,10 @@ class PointSet2d:
             points.append(Point2d(row[0], row[1]))
 
         return PointSet2d(points, piece_name, dtype=points_array.dtype)
+
+    @property
+    def pitch_extractor(self):
+        return self._pitch_extractor
 
     @property
     def score(self):
