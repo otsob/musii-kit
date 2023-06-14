@@ -180,9 +180,14 @@ class PointSet2d:
     @staticmethod
     def _extract_piece_name(score):
         piece_name = None
-        name_elem = next(filter(lambda e: hasattr(e, 'movementName'), score.elements))
-        if name_elem:
-            piece_name = name_elem.movementName
+
+        if hasattr(score, 'metadata'):
+            metadata = score.metadata
+            if hasattr(metadata, 'title') and metadata.title:
+                piece_name = metadata.title
+            elif hasattr(metadata, 'movementName') and metadata.movementName:
+                piece_name = metadata.movementName
+
         return piece_name
 
     @staticmethod

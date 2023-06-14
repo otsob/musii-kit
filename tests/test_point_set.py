@@ -164,7 +164,7 @@ class TestPointSetIO:
         Point2d(4.0, 48.0),
         Point2d(4.0, 52.0),
         Point2d(4.0, 55.0)],
-        piece_name='test-point-set.musicxml',
+        piece_name='Point-set test',
         quarter_length=1.0,
         measure_line_positions=[0.0, 4.0, 8.0])
 
@@ -202,7 +202,7 @@ class TestPointSetIO:
         Point2d(4.0, 53.0),
         Point2d(4.0, 55.0),
         Point2d(4.0, 57.0)],
-        piece_name='test-point-set.musicxml',
+        piece_name='Point-set test',
         quarter_length=1.0,
         measure_line_positions=[0.0, 4.0, 8.0])
 
