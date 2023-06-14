@@ -2,7 +2,6 @@ from typing import List
 
 import music21 as m21
 import numpy as np
-from matplotlib import pyplot as plt
 
 
 class Point2d:
@@ -87,7 +86,7 @@ class PointSet2d:
     """ A 2-dimensional point set representation of a piece of music. """
 
     def __init__(self, points: List[Point2d], piece_name=None, dtype=float, quarter_length=1.0,
-                 measure_line_positions=None):
+                 measure_line_positions=None, score=None, points_to_notes=None, pitch_extractor=None):
         """
         Constructs new instance.
         :param points: the points in the point set as a numpy array
@@ -112,6 +111,9 @@ class PointSet2d:
 
         self.quarter_length = quarter_length
         self.measure_line_positions = measure_line_positions
+        self._point_to_notes = points_to_notes
+        self._score = score
+        self._pitch_extractor = pitch_extractor
 
     @staticmethod
     def chromatic_pitch(m21_pitch):
@@ -146,7 +148,7 @@ class PointSet2d:
 
         measure_line_positions = []
         first_staff = True
-        points = []
+        points_and_notes = {}
 
         for staff in score.parts:
 
@@ -154,11 +156,11 @@ class PointSet2d:
 
             for measure in filter(lambda m: isinstance(m, m21.stream.base.Measure), staff):
                 for elem in measure:
-                    PointSet2d._read_elem_to_points(elem, measure_offset, points, pitch_extractor)
+                    PointSet2d._read_elem_to_points(elem, measure_offset, points_and_notes, pitch_extractor)
 
                     if isinstance(elem, m21.stream.Voice):
                         for e in elem:
-                            PointSet2d._read_elem_to_points(e, measure_offset, points, pitch_extractor)
+                            PointSet2d._read_elem_to_points(e, measure_offset, points_and_notes, pitch_extractor)
 
                 if first_staff:
                     measure_line_positions.append(measure_offset)
@@ -170,15 +172,22 @@ class PointSet2d:
 
             first_staff = False
 
-        return PointSet2d(points, PointSet2d._extract_piece_name(score), dtype=float, quarter_length=1.0,
-                          measure_line_positions=measure_line_positions)
+        return PointSet2d(points_and_notes.keys(), PointSet2d._extract_piece_name(score), dtype=float,
+                          quarter_length=1.0,
+                          measure_line_positions=measure_line_positions, score=score, points_to_notes=points_and_notes,
+                          pitch_extractor=pitch_extractor)
 
     @staticmethod
     def _extract_piece_name(score):
         piece_name = None
-        name_elem = next(filter(lambda e: hasattr(e, 'movementName'), score.elements))
-        if name_elem:
-            piece_name = name_elem.movementName
+
+        if hasattr(score, 'metadata'):
+            metadata = score.metadata
+            if hasattr(metadata, 'title') and metadata.title:
+                piece_name = metadata.title
+            elif hasattr(metadata, 'movementName') and metadata.movementName:
+                piece_name = metadata.movementName
+
         return piece_name
 
     @staticmethod
@@ -194,11 +203,13 @@ class PointSet2d:
     @staticmethod
     def _read_elem_to_points(elem, measure_offset, points, pitch_extractor):
         if PointSet2d._is_note_onset(elem):
-            points.append(Point2d(measure_offset + elem.offset, pitch_extractor(elem.pitch)))
+            point = Point2d(measure_offset + elem.offset, pitch_extractor(elem.pitch))
+            points[point] = elem
         if isinstance(elem, m21.chord.Chord) and not isinstance(elem, m21.harmony.ChordSymbol):
             for note in elem:
                 if PointSet2d._is_note_onset(note):
-                    points.append(Point2d(measure_offset + elem.offset, pitch_extractor(note.pitch)))
+                    point = Point2d(measure_offset + elem.offset, pitch_extractor(note.pitch))
+                    points[point] = note
 
     @staticmethod
     def from_numpy(points_array, piece_name=None):
@@ -208,6 +219,26 @@ class PointSet2d:
             points.append(Point2d(row[0], row[1]))
 
         return PointSet2d(points, piece_name, dtype=points_array.dtype)
+
+    @property
+    def pitch_extractor(self):
+        return self._pitch_extractor
+
+    @property
+    def score(self):
+        """ The score from which this point-set was created. If this point-set was not created
+        from a score, this is None."""
+        return self._score
+
+    def get_note(self, point: Point2d):
+        """
+        Returns the note element corresponding to the given point if this point-set was
+        created from a score.
+        :param point: the point for which the corresponding note element is returned
+        :return: the note element corresponding to the given point if this point-set was
+        created from a score
+        """
+        return self._point_to_notes[point]
 
     @property
     def dtype(self):
@@ -372,59 +403,3 @@ class PatternOccurrences2d:
             occurrences.append(Pattern2d.from_dict(occ_dict))
 
         return PatternOccurrences2d(piece, pattern, occurrences)
-
-
-class Plot:
-    """ Defines a plot of a point-set and optionally patterns.
-
-    Attributes:
-    point_colors - the colors of the points in matploblib scatter-plot format.
-    point_size - the size of the points
-    measure_lines - where to plot vertical measure lines
-    """
-
-    def __init__(self, point_set: PointSet2d):
-        """
-        Creates a new plot
-        :param point_set: the point set to plot
-        """
-        self._point_set = point_set
-        self.point_colors = 'k'
-        self.point_size = 1.0
-        self.measure_lines = []
-        self._patterns = []
-
-    def add_pattern(self, pattern: Pattern2d, color='b'):
-        """
-        Add pattern to visualize.
-        :param pattern: the point pattern to visualize
-        :param color: the color used to visualize the pattern
-        """
-        self._patterns.append((pattern, color))
-
-    def show(self):
-        """
-        Show the given point set as a scatter plot.
-        """
-        points = self._point_set.as_numpy()
-        plt.title(self._point_set.piece_name)
-        plt.scatter(points[:, 0], points[:, 1], s=self.point_size, c=self.point_colors)
-        plt.xlabel('Onset time')
-        plt.ylabel('Pitch number')
-
-        if self.measure_lines:
-            max_pitch = np.max(points[:, 1])
-            min_pitch = np.min(points[:, 1])
-
-            if min_pitch == max_pitch:
-                max_pitch += 1.0
-                min_pitch -= 1.0
-
-            plt.vlines(self.measure_lines, min_pitch, max_pitch, colors='k', linestyles='dotted', alpha=0.25)
-
-        for pattern_with_color in self._patterns:
-            pattern = pattern_with_color[0]
-            color = pattern_with_color[1]
-            plt.scatter(pattern.as_numpy()[:, 0], pattern.as_numpy()[:, 1], s=self.point_size * 2.0, c=color)
-
-        plt.show()
