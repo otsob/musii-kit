@@ -1,0 +1,335 @@
+[
+  {
+    "occurrences": [
+      {
+        "data": [
+          [
+            2.0,
+            55.0
+          ],
+          [
+            2.0,
+            62.0
+          ]
+        ],
+        "dtype": "float",
+        "label": "P0",
+        "representation": "point_set",
+        "source": "SIATEC-C"
+      },
+      {
+        "data": [
+          [
+            4.0,
+            52.0
+          ],
+          [
+            4.0,
+            59.0
+          ]
+        ],
+        "dtype": "float",
+        "label": "P0",
+        "representation": "point_set",
+        "source": "SIATEC-C"
+      }
+    ],
+    "pattern": {
+      "data": [
+        [
+          4.0,
+          48.0
+        ],
+        [
+          4.0,
+          55.0
+        ]
+      ],
+      "dtype": "float",
+      "label": "P0",
+      "representation": "point_set",
+      "source": "SIATEC-C"
+    },
+    "piece": "test-piece"
+  },
+  {
+    "occurrences": [
+      {
+        "data": [
+          [
+            4.0,
+            55.0
+          ],
+          [
+            4.0,
+            59.0
+          ]
+        ],
+        "dtype": "float",
+        "label": "P1",
+        "representation": "point_set",
+        "source": "SIATEC-C"
+      }
+    ],
+    "pattern": {
+      "data": [
+        [
+          4.0,
+          48.0
+        ],
+        [
+          4.0,
+          52.0
+        ]
+      ],
+      "dtype": "float",
+      "label": "P1",
+      "representation": "point_set",
+      "source": "SIATEC-C"
+    },
+    "piece": "test-piece"
+  },
+  {
+    "occurrences": [
+      {
+        "data": [
+          [
+            0.0,
+            60.0
+          ]
+        ],
+        "dtype": "float",
+        "label": "P2",
+        "representation": "point_set",
+        "source": "SIATEC-C"
+      },
+      {
+        "data": [
+          [
+            2.0,
+            55.0
+          ]
+        ],
+        "dtype": "float",
+        "label": "P2",
+        "representation": "point_set",
+        "source": "SIATEC-C"
+      },
+      {
+        "data": [
+          [
+            2.0,
+            62.0
+          ]
+        ],
+        "dtype": "float",
+        "label": "P2",
+        "representation": "point_set",
+        "source": "SIATEC-C"
+      },
+      {
+        "data": [
+          [
+            4.0,
+            48.0
+          ]
+        ],
+        "dtype": "float",
+        "label": "P2",
+        "representation": "point_set",
+        "source": "SIATEC-C"
+      },
+      {
+        "data": [
+          [
+            4.0,
+            52.0
+          ]
+        ],
+        "dtype": "float",
+        "label": "P2",
+        "representation": "point_set",
+        "source": "SIATEC-C"
+      },
+      {
+        "data": [
+          [
+            4.0,
+            55.0
+          ]
+        ],
+        "dtype": "float",
+        "label": "P2",
+        "representation": "point_set",
+        "source": "SIATEC-C"
+      },
+      {
+        "data": [
+          [
+            4.0,
+            59.0
+          ]
+        ],
+        "dtype": "float",
+        "label": "P2",
+        "representation": "point_set",
+        "source": "SIATEC-C"
+      },
+      {
+        "data": [
+          [
+            4.0,
+            72.0
+          ]
+        ],
+        "dtype": "float",
+        "label": "P2",
+        "representation": "point_set",
+        "source": "SIATEC-C"
+      },
+      {
+        "data": [
+          [
+            4.33333,
+            74.0
+          ]
+        ],
+        "dtype": "float",
+        "label": "P2",
+        "representation": "point_set",
+        "source": "SIATEC-C"
+      },
+      {
+        "data": [
+          [
+            4.66667,
+            76.0
+          ]
+        ],
+        "dtype": "float",
+        "label": "P2",
+        "representation": "point_set",
+        "source": "SIATEC-C"
+      }
+    ],
+    "pattern": {
+      "data": [
+        [
+          2.0,
+          60.0
+        ]
+      ],
+      "dtype": "float",
+      "label": "P2",
+      "representation": "point_set",
+      "source": "SIATEC-C"
+    },
+    "piece": "test-piece"
+  },
+  {
+    "occurrences": [
+      {
+        "data": [
+          [
+            4.0,
+            48.0
+          ],
+          [
+            4.0,
+            55.0
+          ]
+        ],
+        "dtype": "float",
+        "label": "P3",
+        "representation": "point_set",
+        "source": "SIATEC-C"
+      },
+      {
+        "data": [
+          [
+            4.0,
+            52.0
+          ],
+          [
+            4.0,
+            59.0
+          ]
+        ],
+        "dtype": "float",
+        "label": "P3",
+        "representation": "point_set",
+        "source": "SIATEC-C"
+      }
+    ],
+    "pattern": {
+      "data": [
+        [
+          2.0,
+          55.0
+        ],
+        [
+          2.0,
+          62.0
+        ]
+      ],
+      "dtype": "float",
+      "label": "P3",
+      "representation": "point_set",
+      "source": "SIATEC-C"
+    },
+    "piece": "test-piece"
+  },
+  {
+    "occurrences": [
+      {
+        "data": [
+          [
+            4.0,
+            48.0
+          ],
+          [
+            4.0,
+            55.0
+          ]
+        ],
+        "dtype": "float",
+        "label": "P4",
+        "representation": "point_set",
+        "source": "SIATEC-C"
+      },
+      {
+        "data": [
+          [
+            4.0,
+            52.0
+          ],
+          [
+            4.0,
+            59.0
+          ]
+        ],
+        "dtype": "float",
+        "label": "P4",
+        "representation": "point_set",
+        "source": "SIATEC-C"
+      }
+    ],
+    "pattern": {
+      "data": [
+        [
+          2.0,
+          55.0
+        ],
+        [
+          2.0,
+          62.0
+        ]
+      ],
+      "dtype": "float",
+      "label": "P4",
+      "representation": "point_set",
+      "source": "SIATEC-C"
+    },
+    "piece": "test-piece"
+  }
+]
