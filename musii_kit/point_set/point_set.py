@@ -115,6 +115,11 @@ class PointSet2d:
         self._score = score
         self._pitch_extractor = pitch_extractor
 
+        if pitch_extractor is PointSet2d.chromatic_pitch:
+            self._pitch_type = 'chromatic'
+        if pitch_extractor is PointSet2d.morphetic_pitch:
+            self._pitch_type = 'morphetic'
+
     @staticmethod
     def chromatic_pitch(m21_pitch):
         return m21_pitch.ps
@@ -220,9 +225,52 @@ class PointSet2d:
 
         return PointSet2d(points, piece_name, dtype=points_array.dtype)
 
+    @staticmethod
+    def from_dict(input_dict):
+        piece_name = input_dict['piece_name']
+        quarter_length = input_dict['quarter_length']
+        measure_lines = input_dict['measure_line_positions']
+
+        points = list(map(lambda row: Point2d(row[0], row[1]), input_dict['data']))
+
+        data_type = input_dict['dtype']
+        dtype = float
+        if data_type == 'int':
+            dtype = int
+
+        pitch_extractor = None
+        pitch_type = input_dict['pitch_type']
+        if pitch_type == 'chromatic':
+            pitch_extractor = PointSet2d.chromatic_pitch
+        if pitch_type == 'morphetic':
+            pitch_extractor = PointSet2d.morphetic_pitch
+
+        return PointSet2d(points, piece_name, dtype, quarter_length, measure_lines, pitch_extractor=pitch_extractor)
+
+    def to_dict(self):
+        return {'piece_name': self.piece_name,
+                'dtype': self._dtype_to_str(),
+                'representation': 'point_set',
+                'pitch_type': self.pitch_type,
+                'quarter_length': self.quarter_length,
+                'measure_line_positions': self.measure_line_positions,
+                'data': self._points[:, 0:2].tolist()}
+
+    def _dtype_to_str(self):
+        dtype_str = 'None'
+        if self.dtype == int:
+            dtype_str = 'int'
+        elif self.dtype == float:
+            dtype_str = 'float'
+        return dtype_str
+
     @property
     def pitch_extractor(self):
         return self._pitch_extractor
+
+    @property
+    def pitch_type(self):
+        return self._pitch_type
 
     @property
     def score(self):
@@ -325,17 +373,11 @@ class Pattern2d(PointSet2d):
         return Pattern2d(points, label, source, piece_name, dtype=points_array.dtype)
 
     def to_dict(self):
-        dtype_str = 'None'
-        if self.dtype == int:
-            dtype_str = 'int'
-        elif self.dtype == float:
-            dtype_str = 'float'
-
         return {'label': self.label,
                 'source': self.source,
-                'pattern_type': 'point_set',
-                'dtype': dtype_str,
-                'data': self._points.tolist()}
+                'representation': 'point_set',
+                'dtype': self._dtype_to_str(),
+                'data': self._points[:, 0:2].tolist()}
 
     def __str__(self):
         return f'[{self.label}; {self.source}; {self._dtype}: {self._points}]'

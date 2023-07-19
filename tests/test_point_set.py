@@ -1,10 +1,11 @@
 import os
+import tempfile
 from pathlib import Path
 
 import numpy as np
 
 from musii_kit.point_set.point_set import Pattern2d, Point2d, PointSet2d
-from musii_kit.point_set.point_set_io import read_musicxml, read_csv
+from musii_kit.point_set.point_set_io import read_musicxml, read_csv, write_point_set_to_json, read_point_set_from_json
 
 
 class TestPointSet2d:
@@ -148,6 +149,8 @@ class TestPoint2d:
 
 
 class TestPointSetIO:
+    test_path = Path(os.path.dirname(os.path.realpath(__file__)))
+
     expected_chromatic = PointSet2d([
         Point2d(0.0, 60.0),
         Point2d(2.0, 60.0),
@@ -169,8 +172,7 @@ class TestPointSetIO:
         measure_line_positions=[0.0, 4.0, 8.0])
 
     def test_read_chromatic_point_set_from_musicxml(self):
-        test_path = Path(os.path.dirname(os.path.realpath(__file__)))
-        point_set = read_musicxml(test_path / 'resources/test-point-set.musicxml')
+        point_set = read_musicxml(self.test_path / 'resources/test-point-set.musicxml')
 
         assert np.array_equal(self.expected_chromatic.as_numpy()[:, 0], point_set.as_numpy()[:, 0])
         assert np.array_equal(self.expected_chromatic.as_numpy()[:, 1], point_set.as_numpy()[:, 1])
@@ -178,10 +180,10 @@ class TestPointSetIO:
         assert point_set.piece_name == self.expected_chromatic.piece_name
         assert point_set.measure_line_positions == self.expected_chromatic.measure_line_positions
         assert point_set.quarter_length == self.expected_chromatic.quarter_length
+        assert 'chromatic' == point_set.pitch_type
 
     def test_read_chromatic_point_set_from_csv(self):
-        test_path = Path(os.path.dirname(os.path.realpath(__file__)))
-        point_set = read_csv(test_path / 'resources/test-point-set.csv', onset_column=0, pitch_column=1)
+        point_set = read_csv(self.test_path / 'resources/test-point-set.csv', onset_column=0, pitch_column=1)
 
         assert np.array_equal(self.expected_chromatic.as_numpy()[:, 0], point_set.as_numpy()[:, 0])
         assert np.array_equal(self.expected_chromatic.as_numpy()[:, 1], point_set.as_numpy()[:, 1])
@@ -207,8 +209,7 @@ class TestPointSetIO:
         measure_line_positions=[0.0, 4.0, 8.0])
 
     def test_read_morphetic_point_set_from_musicxml(self):
-        test_path = Path(os.path.dirname(os.path.realpath(__file__)))
-        point_set = read_musicxml(test_path / 'resources/test-point-set.musicxml',
+        point_set = read_musicxml(self.test_path / 'resources/test-point-set.musicxml',
                                   pitch_extractor=PointSet2d.morphetic_pitch)
 
         assert np.array_equal(self.expected_morphetic.as_numpy()[:, 0], point_set.as_numpy()[:, 0])
@@ -217,10 +218,25 @@ class TestPointSetIO:
         assert point_set.piece_name == self.expected_morphetic.piece_name
         assert point_set.measure_line_positions == self.expected_morphetic.measure_line_positions
         assert point_set.quarter_length == self.expected_morphetic.quarter_length
+        assert 'morphetic' == point_set.pitch_type
 
     def test_read_morphetic_point_set_from_csv(self):
-        test_path = Path(os.path.dirname(os.path.realpath(__file__)))
-        point_set = read_csv(test_path / 'resources/test-point-set.csv', onset_column=0, pitch_column=2)
+        point_set = read_csv(self.test_path / 'resources/test-point-set.csv', onset_column=0, pitch_column=2)
 
         assert np.array_equal(self.expected_morphetic.as_numpy()[:, 0], point_set.as_numpy()[:, 0])
         assert np.array_equal(self.expected_morphetic.as_numpy()[:, 1], point_set.as_numpy()[:, 1])
+
+    def test_json_serialization_deserialization(self):
+        original = read_musicxml(self.test_path / 'resources/test-point-set.musicxml',
+                                 pitch_extractor=PointSet2d.chromatic_pitch)
+
+        with tempfile.NamedTemporaryFile() as tmp:
+            path = tmp.name
+            write_point_set_to_json(original, path)
+            read_ps = read_point_set_from_json(path)
+
+        assert original.piece_name == read_ps.piece_name
+        assert original.quarter_length == read_ps.quarter_length
+        assert original.measure_line_positions == read_ps.measure_line_positions
+        assert original.pitch_type == read_ps.pitch_type
+        assert np.allclose(original.as_numpy(), read_ps.as_numpy())

@@ -7,6 +7,27 @@ import numpy as np
 from musii_kit.point_set.point_set import PointSet2d, PatternOccurrences2d
 
 
+def read_point_set_from_json(input_path) -> PointSet2d:
+    """
+    Reads a point-set from a JSON file.
+    :param input_path: the path to the JSON file containing a point-set.
+    :return: a point-set with contents from the input JSON
+    """
+    with open(input_path, 'r') as input_file:
+        return PointSet2d.from_dict(json.loads(input_file.read()))
+
+
+def write_point_set_to_json(point_set: PointSet2d, output_path):
+    """
+    Writes the given point-set to a JSON file in the specified path.
+
+    :param point_set: the point-set to write to JSON
+    :param output_path: the path to which the JSON output is written
+    """
+    with open(output_path, 'w') as outfile:
+        json.dump(point_set.to_dict(), outfile, indent=2)
+
+
 def write_patterns_to_json(pattern_occurrences: PatternOccurrences2d, output_path):
     """
     Writes the given pattern occurrences to JSON.
