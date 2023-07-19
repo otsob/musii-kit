@@ -60,6 +60,14 @@ class TestPointSet2d:
         assert Point2d(0.0, 21.0) == intersection[0]
         assert Point2d(1.0, 20.0) == intersection[1]
 
+    def test_given_range_within_point_set_then_point_are_returned(self):
+        point_set = PointSet2d(self.test_points, piece_name='Test piece', dtype=float)
+        points_in_range = point_set.get_range(1.0, 2.0)
+        assert len(points_in_range) == 3
+        assert Point2d(1.0, 20.0) == points_in_range[0]
+        assert Point2d(2.0, 20.0) == points_in_range[1]
+        assert Point2d(2.0, 21.0) == points_in_range[2]
+
 
 class TestPointPattern2d:
     test_points = [Point2d(1.0000001, 20.0), Point2d(1.0, 20.0), Point2d(0.0, 21.0)]

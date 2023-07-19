@@ -369,6 +369,23 @@ class PointSet2d:
 
         return onsets_match and pitches_match
 
+    def get_range(self, start, end) -> List[Point2d]:
+        """
+        Returns the points in the given time-range (inclusive) in ascending lexicographic order.
+        :param start: the earliest onset time to include in the range
+        :param end: the latest onset time to include in the range
+        :return: the points in the given time-range (inclusive)
+        """
+
+        onsets = self._points[:, 0]
+        indices = np.where((start <= onsets) & (onsets <= end))[0]
+
+        points = []
+        for i in indices:
+            points.append(self[i])
+
+        return points
+
 
 class Pattern2d(PointSet2d):
     """ Represents a pattern in a 2-dimensional point-set representation of music. """
