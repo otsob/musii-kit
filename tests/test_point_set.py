@@ -86,6 +86,21 @@ class TestPointPattern2d:
         assert pattern[0] == Point2d(0, 21)
         assert pattern[1] == Point2d(1, 20)
 
+    def test_given_equal_patterns_equals_returns_true(self):
+        pattern_a = Pattern2d(self.test_points, 'A', 'Analyst', dtype=float)
+        pattern_b = Pattern2d([Point2d(1.0, 20.0), Point2d(1.00000001, 20.0), Point2d(0.0, 21.0)], 'B', 'Analyst',
+                              dtype=float)
+
+        assert pattern_a.equals_in_points(pattern_a)
+        assert pattern_a.equals_in_points(pattern_b)
+
+    def test_given_unequal_patterns_equals_returns_false(self):
+        pattern_a = Pattern2d(self.test_points, 'A', 'Analyst', dtype=float)
+        pattern_b = Pattern2d([Point2d(1.0000001, 20.0), Point2d(1.0, 21.0), Point2d(0.0, 21.0)], 'B', 'Analyst',
+                              dtype=float)
+
+        assert not pattern_a.equals_in_points(pattern_b)
+
 
 class TestPoint2d:
     def test_given_equal_points_equals_is_true(self):
