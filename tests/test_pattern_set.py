@@ -19,10 +19,10 @@ class TestPatternSet:
 
     def test_loading_pattern_set_from_csv(self):
         pattern_set_path = Path(os.path.dirname(os.path.realpath(__file__))) / 'resources/pattern_set_csv'
-        pattern_set = PatternSet(pattern_set_path)
+        pattern_set = PatternSet.from_path(pattern_set_path)
         self._assert_pattern_set_is_expected(pattern_set)
 
     def test_loading_pattern_set_from_musicxml(self):
         pattern_set_path = Path(os.path.dirname(os.path.realpath(__file__))) / 'resources/pattern_set_musicxml'
-        pattern_set = PatternSet(pattern_set_path)
+        pattern_set = PatternSet.from_path(pattern_set_path)
         self._assert_pattern_set_is_expected(pattern_set)
