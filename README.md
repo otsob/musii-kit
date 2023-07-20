@@ -20,8 +20,7 @@ The exact packages used by musii-kit are defined in the [poetry.lock](./poetry.l
 
 ## Installation
 
-1. Activate virtual environment by running `poetry shell` at the root of this repository.
-2. Run `./install_kernel.sh`
+Run `poetry run ./install_kernel.sh` to install the musii-kit jupyter kernel.
 
 ## Running in a Docker container
 
