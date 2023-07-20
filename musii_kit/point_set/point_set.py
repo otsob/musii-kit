@@ -219,13 +219,15 @@ class PointSet2d:
                     points[point] = note
 
     @staticmethod
-    def from_numpy(points_array, piece_name=None):
+    def from_numpy(points_array, piece_name=None, pitch_type=None):
         points = []
         for i in range(len(points_array)):
             row = points_array[i, :]
             points.append(Point2d(row[0], row[1]))
 
-        return PointSet2d(points, piece_name, dtype=points_array.dtype)
+        point_set = PointSet2d(points, piece_name, dtype=points_array.dtype)
+        point_set._pitch_type = pitch_type
+        return point_set
 
     @staticmethod
     def from_dict(input_dict):
@@ -414,24 +416,27 @@ class PointSet2d:
 class Pattern2d(PointSet2d):
     """ Represents a pattern in a 2-dimensional point-set representation of music. """
 
-    def __init__(self, points: List[Point2d], label: str, source: str, piece_name=None, dtype=float):
+    def __init__(self, points: List[Point2d], label: str, source: str, piece_name=None, dtype=float,
+                 pitch_type='chromatic'):
         super().__init__(points, piece_name, dtype)
         self.label = label
         self.source = source
+        self._pitch_type = pitch_type
 
     @staticmethod
-    def from_numpy(points_array, label: str, source: str, piece_name=None):
+    def from_numpy(points_array, label: str, source: str, piece_name=None, pitch_type='chromatic'):
         points = []
         for i in range(len(points_array)):
             row = points_array[i, :]
             points.append(Point2d(row[0], row[1]))
 
-        return Pattern2d(points, label, source, piece_name, dtype=points_array.dtype)
+        return Pattern2d(points, label, source, piece_name, dtype=points_array.dtype, pitch_type=pitch_type)
 
     def to_dict(self):
         return {'label': self.label,
                 'source': self.source,
                 'representation': 'point_set',
+                'pitch_type': self.pitch_type,
                 'dtype': self._dtype_to_str(),
                 'data': self._points[:, 0:2].tolist()}
 
@@ -446,13 +451,14 @@ class Pattern2d(PointSet2d):
         label = input_dict['label']
         source = input_dict['source']
         data_type = input_dict['dtype']
+        pitch_type = input_dict['pitch_type']
         points = list(map(lambda row: Point2d(row[0], row[1]), input_dict['data']))
 
         dtype = float
         if data_type == 'int':
             dtype = int
 
-        return Pattern2d(points, label, source, dtype=dtype)
+        return Pattern2d(points, label, source, dtype=dtype, pitch_type=pitch_type)
 
     def time_scaled(self, factor):
         """
@@ -507,7 +513,7 @@ class PatternOccurrences2d:
         return ''.join(string_components)
 
     @staticmethod
-    def from_dict(input_dict):
+    def from_dict(input_dict: object) -> object:
         piece = input_dict['piece']
         pattern = Pattern2d.from_dict(input_dict['pattern'])
         occurrences = []

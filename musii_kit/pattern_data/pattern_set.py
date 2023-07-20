@@ -1,9 +1,9 @@
+import json
 import os
-from pathlib import Path
 
 import pandas as pd
 
-from musii_kit.point_set.point_set import PointSet2d
+from musii_kit.point_set.point_set import PointSet2d, PatternOccurrences2d
 from musii_kit.point_set.point_set_io import read_patterns_from_json, read_musicxml
 
 
@@ -23,24 +23,36 @@ class PatternSet:
     files in order for the patterns to be associated with the correct piece.
     """
 
-    def __init__(self, path, pitch_extractor=PointSet2d.chromatic_pitch):
+    def __init__(self, data):
+        """
+        Creates a new pattern dataset with the given data.
+        The data is handled as pairs:
+        0: A 2-dimensional point set of the composition (onset, pitch)
+        1: List of PatternOccurrences of all patterns annotated for the composition
+
+        :param data: the pattern data for point-sets as a list of pairs (point-set, [pattern occurrences])
+        """
+        self._data = data
+
+    @staticmethod
+    def from_path(path, pitch_extractor=PointSet2d.chromatic_pitch):
         """
         Creates a new pattern dataset from the files in the directory at the given path.
-        All JSON files are considered to contain pattern occurrences and all CSV files are
-        assumed to be pieces in point set format. The JSON files must reference the compositions/pieces
-        by the exact filenames of the csv files.
+        All JSON files are considered to contain pattern occurrences and all CSV and MusicXml (.musicxml/.mxl)
+        files are assumed to be pieces in point-set format or as scores.
+        The JSON files must reference the compositions/pieces by the exact filenames of the csv files or
+        titles of the MusicXML scores.
 
-        :param path: the path from which the pattern JSON files are read
+        :param path: the path from which the pattern JSON and score/pointset files are read
         :param pitch_extractor: the pitch extractor to use when reading point-sets from MusicXML
         """
-        self._path = Path(path)
-        self._pitch_extractor = pitch_extractor
-        self._data = self.__collect_data()
+        return PatternSet(PatternSet.__collect_data(path, pitch_extractor))
 
-    def __collect_data(self):
+    @staticmethod
+    def __collect_data(path, pitch_extractor):
         data = []
 
-        compositions, patterns = self.__collect_compositions_and_patterns()
+        compositions, patterns = PatternSet.__collect_compositions_and_patterns(path, pitch_extractor)
         for composition in compositions:
 
             if composition in patterns:
@@ -50,18 +62,19 @@ class PatternSet:
 
         return data
 
-    def __collect_compositions_and_patterns(self):
+    @staticmethod
+    def __collect_compositions_and_patterns(path, pitch_extractor):
         compositions = {}
         patterns = {}
 
-        for root, _, files in os.walk(self._path):
+        for root, _, files in os.walk(path):
             for file in files:
                 if file.endswith('.csv'):
                     df = pd.read_csv(os.path.join(root, file), header=None)
                     piece = file[0:-4]
                     compositions[piece] = PointSet2d.from_numpy(df.to_numpy()[:, 0:2], piece_name=piece)
                 if file.endswith('.musicxml') or file.endswith('.mxl'):
-                    point_set = read_musicxml(os.path.join(root, file), self._pitch_extractor)
+                    point_set = read_musicxml(os.path.join(root, file), pitch_extractor)
                     piece = point_set.piece_name
                     compositions[piece] = point_set
                 if file.endswith('.json'):
@@ -94,3 +107,58 @@ class PatternSet:
 
     def __getitem__(self, item):
         return self._data[item]
+
+    def to_dict(self):
+        """
+        Returns a dictionary of this pattern set with the piece/composition names as keys,
+        and for each composition its point-set and all pattern occurrences.
+
+        :return: a dictionary of this pattern set
+        """
+        pattern_set_dict = {}
+        for i in range(len(self)):
+            point_set = self[i][0]
+            patterns = self[i][1]
+            pattern_set_dict[point_set.piece_name] = {
+                'point-set': point_set.to_dict(),
+                'patterns': [occs.to_dict() for occs in patterns]
+            }
+
+        return pattern_set_dict
+
+    @staticmethod
+    def from_dict(input_dict):
+        data = []
+
+        for piece_name in input_dict:
+            point_set = PointSet2d.from_dict(input_dict[piece_name]['point-set'])
+            pattern_contents = input_dict[piece_name]['patterns']
+
+            if isinstance(pattern_contents, list):
+                patterns = [PatternOccurrences2d.from_dict(elem) for elem in pattern_contents]
+            else:
+                patterns = [PatternOccurrences2d.from_dict(pattern_contents)]
+
+            data.append((point_set, patterns))
+
+        return PatternSet(data)
+
+    @staticmethod
+    def write_to_json(pattern_set, output_path):
+        """
+        Writes the given pattern set into json to the output path.
+        :param pattern_set: the pattern set to write
+        :param output_path: the path where the json is stored
+        """
+        with open(output_path, 'w') as outfile:
+            json.dump(pattern_set.to_dict(), outfile, indent=2)
+
+    @staticmethod
+    def read_from_json(input_path):
+        """
+        Returns a pattern set read from a JSON file in the given path.
+        :param input_path: the path from which the JSON is read
+        :return: a pattern set read from a JSON file
+        """
+        with open(input_path, 'r') as input_file:
+            return PatternSet.from_dict(json.loads(input_file.read()))
