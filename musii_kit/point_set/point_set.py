@@ -219,13 +219,15 @@ class PointSet2d:
                     points[point] = note
 
     @staticmethod
-    def from_numpy(points_array, piece_name=None):
+    def from_numpy(points_array, piece_name=None, pitch_type=None):
         points = []
         for i in range(len(points_array)):
             row = points_array[i, :]
             points.append(Point2d(row[0], row[1]))
 
-        return PointSet2d(points, piece_name, dtype=points_array.dtype)
+        point_set = PointSet2d(points, piece_name, dtype=points_array.dtype)
+        point_set._pitch_type = pitch_type
+        return point_set
 
     @staticmethod
     def from_dict(input_dict):
