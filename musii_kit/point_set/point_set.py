@@ -115,6 +115,13 @@ class PointSet2d:
         self._score = score
         self._pitch_extractor = pitch_extractor
 
+        if pitch_extractor is PointSet2d.chromatic_pitch:
+            self._pitch_type = 'chromatic'
+        elif pitch_extractor is PointSet2d.morphetic_pitch:
+            self._pitch_type = 'morphetic'
+        else:
+            self._pitch_type = None
+
     @staticmethod
     def chromatic_pitch(m21_pitch):
         return m21_pitch.ps
@@ -220,9 +227,52 @@ class PointSet2d:
 
         return PointSet2d(points, piece_name, dtype=points_array.dtype)
 
+    @staticmethod
+    def from_dict(input_dict):
+        piece_name = input_dict['piece_name']
+        quarter_length = input_dict['quarter_length']
+        measure_lines = input_dict['measure_line_positions']
+
+        points = list(map(lambda row: Point2d(row[0], row[1]), input_dict['data']))
+
+        data_type = input_dict['dtype']
+        dtype = float
+        if data_type == 'int':
+            dtype = int
+
+        pitch_extractor = None
+        pitch_type = input_dict['pitch_type']
+        if pitch_type == 'chromatic':
+            pitch_extractor = PointSet2d.chromatic_pitch
+        if pitch_type == 'morphetic':
+            pitch_extractor = PointSet2d.morphetic_pitch
+
+        return PointSet2d(points, piece_name, dtype, quarter_length, measure_lines, pitch_extractor=pitch_extractor)
+
+    def to_dict(self):
+        return {'piece_name': self.piece_name,
+                'dtype': self._dtype_to_str(),
+                'representation': 'point_set',
+                'pitch_type': self.pitch_type,
+                'quarter_length': self.quarter_length,
+                'measure_line_positions': self.measure_line_positions,
+                'data': self._points[:, 0:2].tolist()}
+
+    def _dtype_to_str(self):
+        dtype_str = 'None'
+        if self.dtype == int:
+            dtype_str = 'int'
+        elif self.dtype == float:
+            dtype_str = 'float'
+        return dtype_str
+
     @property
     def pitch_extractor(self):
         return self._pitch_extractor
+
+    @property
+    def pitch_type(self):
+        return self._pitch_type
 
     @property
     def score(self):
@@ -306,6 +356,60 @@ class PointSet2d:
 
         return PointSet2d(common_points, self.piece_name, self._dtype)
 
+    def equals_in_points(self, other):
+        """
+        Returns true if this point-set is equal to other in terms of the points it contains.
+        Other fields are ignored.
+
+
+        :param other: the point-set with which this is compared
+        :return: true if this point-set is equal to other in terms of the points it contains
+        """
+
+        onsets_match = np.array_equal(self._points[:, 0], other.as_numpy()[:, 0])
+        pitches_match = np.array_equal(self._points[:, 1], other.as_numpy()[:, 1])
+
+        return onsets_match and pitches_match
+
+    def get_range(self, start, end) -> List[Point2d]:
+        """
+        Returns the points in the given time-range (inclusive) in ascending lexicographic order.
+        :param start: the earliest onset time to include in the range
+        :param end: the latest onset time to include in the range
+        :return: the points in the given time-range (inclusive)
+        """
+
+        onsets = self._points[:, 0]
+        indices = np.where((start <= onsets) & (onsets <= end))[0]
+
+        points = []
+        for i in indices:
+            points.append(self[i])
+
+        return points
+
+    def time_scaled(self, factor):
+        """
+        Returns a time-scaled copy of this point-set. The onset times are multiplied by the given factor.
+        Other fields are copied from this point-set.
+
+        :param factor: the factor by which the time axis is scaled
+        :return: a time-scaled copy of this pattern
+        """
+        scaled_point_array = np.empty(self._points.shape)
+        scaled_point_array[:, 0] = self._points[:, 2] * factor
+        scaled_point_array[:, 1] = self._points[:, 1]
+
+        scaled = PointSet2d.from_numpy(scaled_point_array, self.piece_name)
+        scaled.quarter_length = self.quarter_length
+        scaled.measure_line_positions = self.measure_line_positions
+        scaled._score = self.score
+        scaled._point_to_notes = self._point_to_notes
+        scaled._pitch_extractor = self._pitch_extractor
+        scaled._pitch_type = self._pitch_type
+
+        return scaled
+
 
 class Pattern2d(PointSet2d):
     """ Represents a pattern in a 2-dimensional point-set representation of music. """
@@ -325,17 +429,11 @@ class Pattern2d(PointSet2d):
         return Pattern2d(points, label, source, piece_name, dtype=points_array.dtype)
 
     def to_dict(self):
-        dtype_str = 'None'
-        if self.dtype == int:
-            dtype_str = 'int'
-        elif self.dtype == float:
-            dtype_str = 'float'
-
         return {'label': self.label,
                 'source': self.source,
-                'pattern_type': 'point_set',
-                'dtype': dtype_str,
-                'data': self._points.tolist()}
+                'representation': 'point_set',
+                'dtype': self._dtype_to_str(),
+                'data': self._points[:, 0:2].tolist()}
 
     def __str__(self):
         return f'[{self.label}; {self.source}; {self._dtype}: {self._points}]'
@@ -355,6 +453,20 @@ class Pattern2d(PointSet2d):
             dtype = int
 
         return Pattern2d(points, label, source, dtype=dtype)
+
+    def time_scaled(self, factor):
+        """
+        Returns a time-scaled copy of this point-set. The onset times are multiplied by the given factor.
+        Other fields are copied from this point-set.
+
+        :param factor: the factor by which the time axis is scaled
+        :return: a time-scaled copy of this pattern
+        """
+        scaled_point_array = np.empty(self._points.shape)
+        scaled_point_array[:, 0] = self._points[:, 2] * factor
+        scaled_point_array[:, 1] = self._points[:, 1]
+
+        return Pattern2d.from_numpy(scaled_point_array, self.label, self.source, self.piece_name)
 
 
 class PatternOccurrences2d:
