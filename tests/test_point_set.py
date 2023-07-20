@@ -68,6 +68,16 @@ class TestPointSet2d:
         assert Point2d(2.0, 20.0) == points_in_range[1]
         assert Point2d(2.0, 21.0) == points_in_range[2]
 
+    def test_given_time_scaling_factor_then_pattern_is_scaled(self):
+        point_set = PointSet2d(self.test_points, piece_name='Test piece', dtype=float)
+        expected = PointSet2d([Point2d(2.0, 20.0), Point2d(0.0, 21.0), Point2d(4.0, 20.0),
+                               Point2d(4.0, 21.0)], piece_name='Test piece', dtype=float)
+
+        scaled = point_set.time_scaled(2.0)
+        assert expected.equals_in_points(scaled)
+        assert expected.piece_name == scaled.piece_name
+        assert expected.dtype == scaled.dtype
+
 
 class TestPointPattern2d:
     test_points = [Point2d(1.0000001, 20.0), Point2d(1.0, 20.0), Point2d(0.0, 21.0)]
@@ -108,6 +118,16 @@ class TestPointPattern2d:
                               dtype=float)
 
         assert not pattern_a.equals_in_points(pattern_b)
+
+    def test_given_time_scaling_factor_then_pattern_is_scaled(self):
+        pattern = Pattern2d(self.test_points, 'A', 'Analyst', dtype=float)
+        expected = Pattern2d([Point2d(2.0, 20.0), Point2d(0.0, 21.0)], 'A', 'Analyst', dtype=float)
+
+        scaled = pattern.time_scaled(2.0)
+        assert expected.equals_in_points(scaled)
+        assert expected.label == scaled.label
+        assert expected.source == scaled.source
+        assert expected.dtype == scaled.dtype
 
 
 class TestPoint2d:

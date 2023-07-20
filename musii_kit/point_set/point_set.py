@@ -117,8 +117,10 @@ class PointSet2d:
 
         if pitch_extractor is PointSet2d.chromatic_pitch:
             self._pitch_type = 'chromatic'
-        if pitch_extractor is PointSet2d.morphetic_pitch:
+        elif pitch_extractor is PointSet2d.morphetic_pitch:
             self._pitch_type = 'morphetic'
+        else:
+            self._pitch_type = None
 
     @staticmethod
     def chromatic_pitch(m21_pitch):
@@ -386,6 +388,28 @@ class PointSet2d:
 
         return points
 
+    def time_scaled(self, factor):
+        """
+        Returns a time-scaled copy of this point-set. The onset times are multiplied by the given factor.
+        Other fields are copied from this point-set.
+
+        :param factor: the factor by which the time axis is scaled
+        :return: a time-scaled copy of this pattern
+        """
+        scaled_point_array = np.empty(self._points.shape)
+        scaled_point_array[:, 0] = self._points[:, 2] * factor
+        scaled_point_array[:, 1] = self._points[:, 1]
+
+        scaled = PointSet2d.from_numpy(scaled_point_array, self.piece_name)
+        scaled.quarter_length = self.quarter_length
+        scaled.measure_line_positions = self.measure_line_positions
+        scaled._score = self.score
+        scaled._point_to_notes = self._point_to_notes
+        scaled._pitch_extractor = self._pitch_extractor
+        scaled._pitch_type = self._pitch_type
+
+        return scaled
+
 
 class Pattern2d(PointSet2d):
     """ Represents a pattern in a 2-dimensional point-set representation of music. """
@@ -429,6 +453,20 @@ class Pattern2d(PointSet2d):
             dtype = int
 
         return Pattern2d(points, label, source, dtype=dtype)
+
+    def time_scaled(self, factor):
+        """
+        Returns a time-scaled copy of this point-set. The onset times are multiplied by the given factor.
+        Other fields are copied from this point-set.
+
+        :param factor: the factor by which the time axis is scaled
+        :return: a time-scaled copy of this pattern
+        """
+        scaled_point_array = np.empty(self._points.shape)
+        scaled_point_array[:, 0] = self._points[:, 2] * factor
+        scaled_point_array[:, 1] = self._points[:, 1]
+
+        return Pattern2d.from_numpy(scaled_point_array, self.label, self.source, self.piece_name)
 
 
 class PatternOccurrences2d:
