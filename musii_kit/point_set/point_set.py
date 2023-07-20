@@ -513,7 +513,7 @@ class PatternOccurrences2d:
         return ''.join(string_components)
 
     @staticmethod
-    def from_dict(input_dict):
+    def from_dict(input_dict: object) -> object:
         piece = input_dict['piece']
         pattern = Pattern2d.from_dict(input_dict['pattern'])
         occurrences = []

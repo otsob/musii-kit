@@ -1,8 +1,9 @@
+import json
 import os
 
 import pandas as pd
 
-from musii_kit.point_set.point_set import PointSet2d
+from musii_kit.point_set.point_set import PointSet2d, PatternOccurrences2d
 from musii_kit.point_set.point_set_io import read_patterns_from_json, read_musicxml
 
 
@@ -106,3 +107,58 @@ class PatternSet:
 
     def __getitem__(self, item):
         return self._data[item]
+
+    def to_dict(self):
+        """
+        Returns a dictionary of this pattern set with the piece/composition names as keys,
+        and for each composition its point-set and all pattern occurrences.
+
+        :return: a dictionary of this pattern set
+        """
+        pattern_set_dict = {}
+        for i in range(len(self)):
+            point_set = self[i][0]
+            patterns = self[i][1]
+            pattern_set_dict[point_set.piece_name] = {
+                'point-set': point_set.to_dict(),
+                'patterns': [occs.to_dict() for occs in patterns]
+            }
+
+        return pattern_set_dict
+
+    @staticmethod
+    def from_dict(input_dict):
+        data = []
+
+        for piece_name in input_dict:
+            point_set = PointSet2d.from_dict(input_dict[piece_name]['point-set'])
+            pattern_contents = input_dict[piece_name]['patterns']
+
+            if isinstance(pattern_contents, list):
+                patterns = [PatternOccurrences2d.from_dict(elem) for elem in pattern_contents]
+            else:
+                patterns = [PatternOccurrences2d.from_dict(pattern_contents)]
+
+            data.append((point_set, patterns))
+
+        return PatternSet(data)
+
+    @staticmethod
+    def write_to_json(pattern_set, output_path):
+        """
+        Writes the given pattern set into json to the output path.
+        :param pattern_set: the pattern set to write
+        :param output_path: the path where the json is stored
+        """
+        with open(output_path, 'w') as outfile:
+            json.dump(pattern_set.to_dict(), outfile, indent=2)
+
+    @staticmethod
+    def read_from_json(input_path):
+        """
+        Returns a pattern set read from a JSON file in the given path.
+        :param input_path: the path from which the JSON is read
+        :return: a pattern set read from a JSON file
+        """
+        with open(input_path, 'r') as input_file:
+            return PatternSet.from_dict(json.loads(input_file.read()))
