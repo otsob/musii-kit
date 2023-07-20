@@ -93,7 +93,8 @@ class JkuPdd(PatternSet):
                     # morphetic pitch numbers.
                     pattern_array = self.__chromatic_to_morphetic_points(pattern_array, composition_array)
 
-                occurrences.append(Pattern2d.from_numpy(pattern_array, label, analyst))
+                occurrences.append(
+                    Pattern2d.from_numpy(pattern_array, label, analyst, pitch_type=self._pitch_type))
 
             # The first occurrence in the 'occurrences' directory corresponds to the prototypical version
             # of the pattern in JKU-PDD.

@@ -95,6 +95,7 @@ class TestPointPattern2d:
         pattern_data['dtype'] = 'int'
         pattern_data['data'] = np.array([[0.0, 21.0, 0.0],
                                          [1.0, 20.0, 1.0]]).tolist()
+        pattern_data['pitch_type'] = 'chromatic'
 
         pattern = Pattern2d.from_dict(pattern_data)
         assert pattern.label == 'Test pattern'
