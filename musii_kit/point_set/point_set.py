@@ -96,6 +96,10 @@ class PointSet2d:
         :param dtype: the data type of the point components
         :param quarter_length: the length of a quarter note in the time units used for measuring the onset time axis
         :param measure_line_positions: optional list or array of the positions of measure lines in time
+        :param score: a music21 score object associated with this point-set
+        :param point_set_id: a dict mapping the points to music21 note objects
+        :param pitch_extractor: the pitch extractor used when creating point-set from music21 score
+        :param point_set_id: the identifier of this point-set
         """
 
         self.piece_name = piece_name
@@ -434,6 +438,17 @@ class Pattern2d(PointSet2d):
 
     def __init__(self, points: List[Point2d], label: str, source: str, piece_name=None, dtype=float,
                  pitch_type='chromatic', pattern_id=None):
+        """
+        Creates a new pattern.
+
+        :param points: the points of the pattern
+        :param label: a label associated with the pattern
+        :param source: the source of the pattern, e.g, annotator or algorithm that produced the pattern
+        :param piece_name: the name of the piece in which the pattern occurs
+        :param dtype: the datatype of the point components
+        :param pitch_type: the type of the pitch (chromatic or morphetic)
+        :param pattern_id: the identifier of the pattern
+        """
         super().__init__(points, piece_name, dtype, point_set_id=pattern_id)
         self.label = label
         self.source = source
