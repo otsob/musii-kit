@@ -1,3 +1,4 @@
+import uuid
 from typing import List
 
 import music21 as m21
@@ -86,7 +87,8 @@ class PointSet2d:
     """ A 2-dimensional point set representation of a piece of music. """
 
     def __init__(self, points: List[Point2d], piece_name=None, dtype=float, quarter_length=1.0,
-                 measure_line_positions=None, score=None, points_to_notes=None, pitch_extractor=None):
+                 measure_line_positions=None, score=None, points_to_notes=None, pitch_extractor=None,
+                 point_set_id=None):
         """
         Constructs new instance.
         :param points: the points in the point set as a numpy array
@@ -121,6 +123,16 @@ class PointSet2d:
             self._pitch_type = 'morphetic'
         else:
             self._pitch_type = None
+
+        if point_set_id:
+            self._id = point_set_id
+        else:
+            self._id = str(uuid.uuid1())
+
+    @property
+    def id(self):
+        """ The string identifier or this point-set."""
+        return self._id
 
     @staticmethod
     def chromatic_pitch(m21_pitch):
@@ -235,6 +247,8 @@ class PointSet2d:
         quarter_length = input_dict['quarter_length']
         measure_lines = input_dict['measure_line_positions']
 
+        point_set_id = input_dict['id'] if 'id' in input_dict else None
+
         points = list(map(lambda row: Point2d(row[0], row[1]), input_dict['data']))
 
         data_type = input_dict['dtype']
@@ -249,7 +263,8 @@ class PointSet2d:
         if pitch_type == 'morphetic':
             pitch_extractor = PointSet2d.morphetic_pitch
 
-        return PointSet2d(points, piece_name, dtype, quarter_length, measure_lines, pitch_extractor=pitch_extractor)
+        return PointSet2d(points, piece_name, dtype, quarter_length, measure_lines, pitch_extractor=pitch_extractor,
+                          point_set_id=point_set_id)
 
     def to_dict(self):
         return {'piece_name': self.piece_name,
@@ -258,6 +273,7 @@ class PointSet2d:
                 'pitch_type': self.pitch_type,
                 'quarter_length': self.quarter_length,
                 'measure_line_positions': self.measure_line_positions,
+                'id': self.id,
                 'data': self._points[:, 0:2].tolist()}
 
     def _dtype_to_str(self):
@@ -417,8 +433,8 @@ class Pattern2d(PointSet2d):
     """ Represents a pattern in a 2-dimensional point-set representation of music. """
 
     def __init__(self, points: List[Point2d], label: str, source: str, piece_name=None, dtype=float,
-                 pitch_type='chromatic'):
-        super().__init__(points, piece_name, dtype)
+                 pitch_type='chromatic', pattern_id=None):
+        super().__init__(points, piece_name, dtype, point_set_id=pattern_id)
         self.label = label
         self.source = source
         self._pitch_type = pitch_type
@@ -438,6 +454,7 @@ class Pattern2d(PointSet2d):
                 'representation': 'point_set',
                 'pitch_type': self.pitch_type,
                 'dtype': self._dtype_to_str(),
+                'id': self.id,
                 'data': self._points[:, 0:2].tolist()}
 
     def __str__(self):
@@ -453,12 +470,13 @@ class Pattern2d(PointSet2d):
         data_type = input_dict['dtype']
         pitch_type = input_dict['pitch_type']
         points = list(map(lambda row: Point2d(row[0], row[1]), input_dict['data']))
+        pattern_id = input_dict['id'] if 'id' in input_dict else None
 
         dtype = float
         if data_type == 'int':
             dtype = int
 
-        return Pattern2d(points, label, source, dtype=dtype, pitch_type=pitch_type)
+        return Pattern2d(points, label, source, dtype=dtype, pitch_type=pitch_type, pattern_id=pattern_id)
 
     def time_scaled(self, factor):
         """
