@@ -33,6 +33,31 @@ class PatternSet:
         :param data: the pattern data for point-sets as a list of pairs (point-set, [pattern occurrences])
         """
         self._data = data
+        self._point_sets = {}
+        self._patterns = {}
+        for item in self._data:
+            point_set = item[0]
+            self._point_sets[point_set.id] = point_set
+            pattern_occurrences = item[1]
+            for occurrences in pattern_occurrences:
+                for pattern in occurrences:
+                    self._patterns[pattern.id] = pattern
+
+    def get_pattern(self, pattern_id):
+        """
+        Returns the pattern with the given id from this pattern set.
+        :param pattern_id: the id of the pattern to return
+        :return: the pattern with the given id from this pattern set
+        """
+        return self._patterns[pattern_id]
+
+    def get_point_set(self, point_set_id):
+        """
+        Returns the point-set with the given id from this pattern set.
+        :param point_set_id: the id of the point-set to return
+        :return: the point-set with the given id from this pattern set
+        """
+        return self._point_sets[point_set_id]
 
     @staticmethod
     def from_path(path, pitch_extractor=PointSet2d.chromatic_pitch):
