@@ -1,3 +1,4 @@
+import math
 import uuid
 from typing import List
 
@@ -431,6 +432,26 @@ class PointSet2d:
         scaled._pitch_type = self._pitch_type
 
         return scaled
+
+    def get_measure_range(self, pattern):
+        """
+        Returns the range of measures (inclusive) in the score associated with this point-set for the given pattern.
+        :param pattern: the pattern for which to retrieve the measure range.
+        :return: a pair (first, last) of measure numbers
+        :raise ValueError: if this point-set doesn't have a score
+        """
+        if not self.score:
+            raise ValueError('Cannot retrieve score region because score is None')
+
+        first = math.inf
+        last = -math.inf
+
+        for p in pattern:
+            note_elem = self.get_note(p)
+            first = min(first, note_elem.measureNumber)
+            last = max(last, note_elem.measureNumber)
+
+        return first, last
 
 
 class Pattern2d(PointSet2d):
