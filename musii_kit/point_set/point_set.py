@@ -1,5 +1,6 @@
 import math
 import uuid
+from copy import deepcopy
 from typing import List
 
 import music21 as m21
@@ -452,6 +453,89 @@ class PointSet2d:
             last = max(last, note_elem.measureNumber)
 
         return first, last
+
+    def get_pattern_span(self, pattern):
+        """
+        Returns the timespan of the pattern in the associated score (taking note durations into account).
+        :param pattern: the pattern for which the span is computed
+        :return: the timespan as (start, end) times, where start is the first onset time and end is
+        ending time of the note that ends last in the pattern
+        :raise ValueError: if this point-set doesn't have a score
+        """
+        if not self.score:
+            raise ValueError('Cannot retrieve score region because score is None')
+
+        pattern_start = pattern[0].onset_time
+        pattern_end = max(
+            [round(p.onset_time + self.get_note(p).quarterLength, Point2d.decimal_places) for p in pattern])
+
+        return pattern_start, pattern_end
+
+    @staticmethod
+    def __intersect(a_1, a_2, b_1, b_2):
+        i_1 = max(a_1, b_1)
+        i_2 = min(a_2, b_2)
+
+        if i_1 >= i_2:
+            return None
+
+        return i_1, i_2
+
+    def get_score_region(self, pattern, boundaries='exclude'):
+        """
+        Returns the region (timespan) of the score where the pattern occurs as a music21 stream.
+
+        :param pattern: the pattern for which to return the region of the score
+        :param boundaries: defines how notes that cross the boundaries of the timespan are handled. 'exclude'
+        excludes them, 'include' includes them unaffected, and 'truncate' truncates the notes so that only the
+        part of the note that fits into the timespan is included.
+        :return: the region (time-span) of the score where the pattern occurs
+        :raise ValueError: if this point-set doesn't have a score
+        """
+        if not self.score:
+            raise ValueError('Cannot retrieve score region because score is None')
+
+        first_measure, last_measure = self.get_measure_range(pattern)
+        measures = self.score.measures(first_measure, last_measure)
+        first_in_selection = measures.flatten().notes.first()
+        global_offset = first_in_selection.getOffsetBySite(self.score.flatten()) - first_in_selection.offset
+
+        pattern_start, pattern_end = self.get_pattern_span(pattern)
+
+        stream = deepcopy(measures)
+        flattened_notes = stream.flatten().notes.stream()
+
+        for note in flattened_notes:
+            onset_time = round(note.offset + global_offset, Point2d.decimal_places)
+            end_time = round(onset_time + note.quarterLength, Point2d.decimal_places)
+
+            intersection = self.__intersect(pattern_start, pattern_end, onset_time, end_time)
+            replace_with_rest = False
+
+            if not intersection:
+                replace_with_rest = True
+
+            if intersection:
+                if onset_time < intersection[0]:
+                    if boundaries == 'truncate':
+                        # TODO: add rest before the truncated note
+                        time_reduction = pattern_start - onset_time
+                        note.offset += time_reduction
+                        note.duration.quarterLength -= time_reduction
+                    if boundaries == 'exclude':
+                        replace_with_rest = True
+
+                if intersection[1] < end_time:
+                    if boundaries == 'truncate':
+                        # TODO: add rest after the truncated note
+                        note.duration.quarterLength -= end_time - pattern_end
+                    if boundaries == 'exclude':
+                        replace_with_rest = True
+
+            if replace_with_rest:
+                flattened_notes.replace(note, m21.note.Rest(note.duration.quarterLength), allDerived=True)
+
+        return stream
 
 
 class Pattern2d(PointSet2d):

@@ -90,6 +90,36 @@ class TestPointSet2d:
         assert measure_range[0] == 1
         assert measure_range[1] == 2
 
+    def test_given_pattern_score_region_with_inclusion_is_correctly_retrieved(self):
+        point_set = read_musicxml(self.test_path / 'resources/test-point-set.musicxml')
+        pattern = Pattern2d([Point2d(2.0, 60),
+                             Point2d(4.0, 72.0),
+                             Point2d(4.33333333, 74.0),
+                             Point2d(4.66666667, 76.0)], label='A', source='Manual query')
+
+        region = point_set.get_score_region(pattern, boundaries='include')
+        assert len(region.flatten().notes) == 8
+
+    def test_given_pattern_score_region_with_truncation_is_correctly_retrieved(self):
+        point_set = read_musicxml(self.test_path / 'resources/test-point-set.musicxml')
+        pattern = Pattern2d([Point2d(2.0, 60),
+                             Point2d(4.0, 72.0),
+                             Point2d(4.33333333, 74.0),
+                             Point2d(4.66666667, 76.0)], label='A', source='Manual query')
+
+        region = point_set.get_score_region(pattern, boundaries='truncate')
+        assert len(region.flatten().notes) == 8
+
+    def test_given_pattern_score_region_with_exclusion_is_correctly_retrieved(self):
+        point_set = read_musicxml(self.test_path / 'resources/test-point-set.musicxml')
+        pattern = Pattern2d([Point2d(2.0, 60),
+                             Point2d(4.0, 72.0),
+                             Point2d(4.33333333, 74.0),
+                             Point2d(4.66666667, 76.0)], label='A', source='Manual query')
+
+        region = point_set.get_score_region(pattern, boundaries='exclude')
+        assert len(region.flatten().notes) == 6
+
 
 class TestPointPattern2d:
     test_points = [Point2d(1.0000001, 20.0), Point2d(1.0, 20.0), Point2d(0.0, 21.0)]
