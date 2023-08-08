@@ -326,3 +326,16 @@ class TestPointSetIO:
         assert original.measure_line_positions == read_ps.measure_line_positions
         assert original.pitch_type == read_ps.pitch_type
         assert np.allclose(original.as_numpy(), read_ps.as_numpy())
+
+    def test_repeats_are_correctly_unrolled(self):
+        point_set = read_musicxml(self.test_path / 'resources/point-set-reps.musicxml', expand_repetitions=True)
+        assert point_set.has_expanded_repetitions
+        assert len(point_set) == 8
+        assert point_set[0] == Point2d(-1.0, 60.0)
+        assert point_set[1] == Point2d(0.0, 60.0)
+        assert point_set[2] == Point2d(2.0, 62.0)
+        assert point_set[3] == Point2d(4.0, 64.0)
+        assert point_set[4] == Point2d(8.0, 60.0)
+        assert point_set[5] == Point2d(10.0, 62.0)
+        assert point_set[6] == Point2d(12.0, 64.0)
+        assert point_set[7] == Point2d(16.0, 60.0)
