@@ -177,7 +177,8 @@ class PointSet2d:
 
         for staff in score.parts:
 
-            measure_offset = 0.0
+            pickup_measure = staff.measure(0)
+            measure_offset = -pickup_measure.quarterLength if pickup_measure else 0.0
 
             for measure in filter(lambda m: isinstance(m, m21.stream.base.Measure), staff):
                 for elem in measure:
