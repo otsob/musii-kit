@@ -226,7 +226,11 @@ class PointSet2d:
 
     @staticmethod
     def _is_note_onset(elem):
+        """ Returns true if the element represents a note onset (excluding grace notes). """
         if not isinstance(elem, m21.note.Note):
+            return False
+
+        if isinstance(elem.duration, m21.duration.GraceDuration):
             return False
 
         if elem.tie:
