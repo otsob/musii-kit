@@ -90,7 +90,7 @@ class PointSet2d:
 
     def __init__(self, points: List[Point2d], piece_name=None, dtype=float, quarter_length=1.0,
                  measure_line_positions=None, score=None, points_to_notes=None, pitch_extractor=None,
-                 point_set_id=None):
+                 point_set_id=None, has_expanded_repetitions=False):
         """
         Constructs new instance.
         :param points: the points in the point set as a numpy array
@@ -102,6 +102,8 @@ class PointSet2d:
         :param point_set_id: a dict mapping the points to music21 note objects
         :param pitch_extractor: the pitch extractor used when creating point-set from music21 score
         :param point_set_id: the identifier of this point-set
+        :param has_expanded_repetitions: set to true to indicate that this point-set has been created from a score
+        with repetitions included.
         """
 
         self.piece_name = piece_name
@@ -135,6 +137,8 @@ class PointSet2d:
         else:
             self._id = str(uuid.uuid1())
 
+        self.has_expanded_repetitions = True
+
     @property
     def id(self):
         """ The string identifier or this point-set."""
@@ -162,12 +166,13 @@ class PointSet2d:
         return oct + step + shift
 
     @staticmethod
-    def from_score(score: m21.stream.Score, pitch_extractor=chromatic_pitch):
+    def from_score(score: m21.stream.Score, pitch_extractor=chromatic_pitch, expand_repetitions=False):
         """
         Returns a point-set created from the given music21 score.
 
         :param score: a music21 score
         :param pitch_extractor: the function used to map a music21 pitch to a number
+        :param expand_repetitions: repeat the sections marked with repeats in the score in the returned point-set
         :return: a point-set created from the given score
         """
 
@@ -175,9 +180,13 @@ class PointSet2d:
         first_staff = True
         points_and_notes = {}
 
+        if expand_repetitions:
+            score = score.expandRepeats()
+
         for staff in score.parts:
 
-            measure_offset = 0.0
+            pickup_measure = staff.measure(0)
+            measure_offset = -pickup_measure.quarterLength if pickup_measure else 0.0
 
             for measure in filter(lambda m: isinstance(m, m21.stream.base.Measure), staff):
                 for elem in measure:
@@ -200,7 +209,7 @@ class PointSet2d:
         return PointSet2d(points_and_notes.keys(), PointSet2d._extract_piece_name(score), dtype=float,
                           quarter_length=1.0,
                           measure_line_positions=measure_line_positions, score=score, points_to_notes=points_and_notes,
-                          pitch_extractor=pitch_extractor)
+                          pitch_extractor=pitch_extractor, has_expanded_repetitions=expand_repetitions)
 
     @staticmethod
     def _extract_piece_name(score):
@@ -217,7 +226,11 @@ class PointSet2d:
 
     @staticmethod
     def _is_note_onset(elem):
+        """ Returns true if the element represents a note onset (excluding grace notes). """
         if not isinstance(elem, m21.note.Note):
+            return False
+
+        if isinstance(elem.duration, m21.duration.GraceDuration):
             return False
 
         if elem.tie:
@@ -269,8 +282,11 @@ class PointSet2d:
         if pitch_type == 'morphetic':
             pitch_extractor = PointSet2d.morphetic_pitch
 
+        has_expanded_repetitions = input_dict[
+            'has_expanded_repetitions'] if 'has_expanded_repetitions' in input_dict else False
+
         return PointSet2d(points, piece_name, dtype, quarter_length, measure_lines, pitch_extractor=pitch_extractor,
-                          point_set_id=point_set_id)
+                          point_set_id=point_set_id, has_expanded_repetitions=has_expanded_repetitions)
 
     def to_dict(self):
         return {'piece_name': self.piece_name,
@@ -280,6 +296,7 @@ class PointSet2d:
                 'quarter_length': self.quarter_length,
                 'measure_line_positions': self.measure_line_positions,
                 'id': self.id,
+                'has_expanded_repetitions': self.has_expanded_repetitions,
                 'data': self._points[:, 0:2].tolist()}
 
     def _dtype_to_str(self):

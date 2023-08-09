@@ -60,7 +60,7 @@ class PatternSet:
         return self._point_sets[point_set_id]
 
     @staticmethod
-    def from_path(path, pitch_extractor=PointSet2d.chromatic_pitch):
+    def from_path(path, pitch_extractor=PointSet2d.chromatic_pitch, expand_repetitions=False):
         """
         Creates a new pattern dataset from the files in the directory at the given path.
         All JSON files are considered to contain pattern occurrences and all CSV and MusicXml (.musicxml/.mxl)
@@ -70,16 +70,17 @@ class PatternSet:
 
         :param path: the path from which the pattern JSON and score/pointset files are read
         :param pitch_extractor: the pitch extractor to use when reading point-sets from MusicXML
+        :param expand_repetitions: set to true to expand repetitions in scores when creating the point-sets
         """
-        return PatternSet(PatternSet.__collect_data(path, pitch_extractor))
+        return PatternSet(PatternSet.__collect_data(path, pitch_extractor, expand_repetitions))
 
     @staticmethod
-    def __collect_data(path, pitch_extractor):
+    def __collect_data(path, pitch_extractor, expand_repetitions):
         data = []
 
-        compositions, patterns = PatternSet.__collect_compositions_and_patterns(path, pitch_extractor)
+        compositions, patterns = PatternSet.__collect_compositions_and_patterns(path, pitch_extractor,
+                                                                                expand_repetitions)
         for composition in compositions:
-
             if composition in patterns:
                 data.append((compositions[composition], patterns[composition]))
             else:
@@ -88,7 +89,7 @@ class PatternSet:
         return data
 
     @staticmethod
-    def __collect_compositions_and_patterns(path, pitch_extractor):
+    def __collect_compositions_and_patterns(path, pitch_extractor, expand_repetitions):
         compositions = {}
         patterns = {}
 
@@ -99,7 +100,7 @@ class PatternSet:
                     piece = file[0:-4]
                     compositions[piece] = PointSet2d.from_numpy(df.to_numpy()[:, 0:2], piece_name=piece)
                 if file.endswith('.musicxml') or file.endswith('.mxl'):
-                    point_set = read_musicxml(os.path.join(root, file), pitch_extractor)
+                    point_set = read_musicxml(os.path.join(root, file), pitch_extractor, expand_repetitions)
                     piece = point_set.piece_name
                     compositions[piece] = point_set
                 if file.endswith('.json'):
