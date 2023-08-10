@@ -59,7 +59,7 @@ class PatternSet:
         """
         return self._point_sets[point_set_id]
 
-    def add_patterns(self, patterns: PatternOccurrences2d, point_set_id=None):
+    def add_patterns(self, patterns: PatternOccurrences2d, point_set_id=None, set_piece_name=False):
         """
         Adds the given pattern occurrences to the corresponding piece in this pattern set.
         The patterns are added to the point-set with the matching piece name, or if point_set_id is given,
@@ -67,12 +67,17 @@ class PatternSet:
 
         :param patterns: the patterns to add as a pattern occurrences object
         :param point_set_id: (optional) the id of the point-set with which to associate the added patterns
+        :param set_piece_name: set the piece_name of the patterns to match the piece with which they are associated
         """
         if point_set_id:
             elem = self.__get_elem_by_point_set_id(point_set_id)
         else:
             piece_name = patterns.pattern.piece_name
             elem = self.__get_elem_by_piece_name(piece_name)
+
+        if set_piece_name:
+            for p in patterns:
+                p.piece_name = elem[0].piece_name
 
         elem[1].append(patterns)
 

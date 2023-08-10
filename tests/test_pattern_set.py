@@ -62,11 +62,12 @@ class TestPatternSet:
         pattern_set = PatternSet.from_path(pattern_set_path)
 
         piece_name = 'test-piece'
-        pattern = Pattern2d([Point2d(1.0, 1.0), Point2d(2.0, 2.0)], 'A', 'source', piece_name)
+        pattern = Pattern2d([Point2d(1.0, 1.0), Point2d(2.0, 2.0)], 'A', 'source', '')
         pattern_occs = PatternOccurrences2d(piece_name, pattern, [])
 
-        pattern_set.add_patterns(pattern_occs, point_set_id=pattern_set[0][0].id)
+        pattern_set.add_patterns(pattern_occs, point_set_id=pattern_set[0][0].id, set_piece_name=True)
 
+        assert pattern.piece_name == piece_name
         assert 1 == len(pattern_set)
         assert 11 == pattern_set.get_composition_size(piece_name)
         assert 6 == pattern_set.get_pattern_count(piece_name)
