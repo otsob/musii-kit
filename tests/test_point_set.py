@@ -120,8 +120,7 @@ class TestPointSet2d:
         region = point_set.get_score_region(pattern, boundaries='exclude')
         assert len(region.flatten().notes) == 6
 
-
-class TestPointPattern2d:
+class TestPattern2d:
     test_points = [Point2d(1.0000001, 20.0), Point2d(1.0, 20.0), Point2d(0.0, 21.0)]
 
     def test_given_float_points_pattern_is_created(self):
