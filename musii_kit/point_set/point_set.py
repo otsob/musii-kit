@@ -137,7 +137,7 @@ class PointSet2d:
         else:
             self._id = str(uuid.uuid1())
 
-        self.has_expanded_repetitions = True
+        self.has_expanded_repetitions = has_expanded_repetitions
 
     @property
     def id(self):
@@ -559,7 +559,7 @@ class Pattern2d(PointSet2d):
     """ Represents a pattern in a 2-dimensional point-set representation of music. """
 
     def __init__(self, points: List[Point2d], label: str, source: str, piece_name=None, dtype=float,
-                 pitch_type='chromatic', pattern_id=None):
+                 pitch_type='chromatic', pattern_id=None, additional_data=None):
         """
         Creates a new pattern.
 
@@ -570,11 +570,13 @@ class Pattern2d(PointSet2d):
         :param dtype: the datatype of the point components
         :param pitch_type: the type of the pitch (chromatic or morphetic)
         :param pattern_id: the identifier of the pattern
+        :param additional_data: an optional dictionary of additional data to add to this pattern
         """
         super().__init__(points, piece_name, dtype, point_set_id=pattern_id)
         self.label = label
         self.source = source
         self._pitch_type = pitch_type
+        self.additional_data = additional_data
 
     @staticmethod
     def from_numpy(points_array, label: str, source: str, piece_name=None, pitch_type='chromatic'):
@@ -592,7 +594,8 @@ class Pattern2d(PointSet2d):
                 'pitch_type': self.pitch_type,
                 'dtype': self._dtype_to_str(),
                 'id': self.id,
-                'data': self._points[:, 0:2].tolist()}
+                'data': self._points[:, 0:2].tolist(),
+                'additional_data': self.additional_data}
 
     def __str__(self):
         return f'[{self.label}; {self.source}; {self._dtype}: {self._points}]'
@@ -613,7 +616,10 @@ class Pattern2d(PointSet2d):
         if data_type == 'int':
             dtype = int
 
-        return Pattern2d(points, label, source, dtype=dtype, pitch_type=pitch_type, pattern_id=pattern_id)
+        additional_data = input_dict['additional_data'] if 'additional_data' in input_dict else None
+
+        return Pattern2d(points, label, source, dtype=dtype, pitch_type=pitch_type, pattern_id=pattern_id,
+                         additional_data=additional_data)
 
     def time_scaled(self, factor):
         """

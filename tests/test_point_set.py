@@ -271,6 +271,7 @@ class TestPointSetIO:
     def test_read_chromatic_point_set_from_csv(self):
         point_set = read_csv(self.test_path / 'resources/test-point-set.csv', onset_column=0, pitch_column=1)
 
+        assert not point_set.has_expanded_repetitions
         assert np.array_equal(self.expected_chromatic.as_numpy()[:, 0], point_set.as_numpy()[:, 0])
         assert np.array_equal(self.expected_chromatic.as_numpy()[:, 1], point_set.as_numpy()[:, 1])
 
@@ -327,7 +328,7 @@ class TestPointSetIO:
         assert original.pitch_type == read_ps.pitch_type
         assert np.allclose(original.as_numpy(), read_ps.as_numpy())
 
-    def test_repeats_are_correctly_unrolled(self):
+    def test_repeats_are_correctly_expanded(self):
         point_set = read_musicxml(self.test_path / 'resources/point-set-reps.musicxml', expand_repetitions=True)
         assert point_set.has_expanded_repetitions
         assert len(point_set) == 8
