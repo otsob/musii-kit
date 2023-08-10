@@ -35,13 +35,20 @@ class PatternSet:
         self._data = data
         self._point_sets = {}
         self._patterns = {}
+        self._contents_set = set()
         for item in self._data:
             point_set = item[0]
+            self._contents_set.add(point_set)
             self._point_sets[point_set.id] = point_set
             pattern_occurrences = item[1]
             for occurrences in pattern_occurrences:
                 for pattern in occurrences:
                     self._patterns[pattern.id] = pattern
+                    self._contents_set.add(pattern)
+
+    def __contains__(self, item):
+        """ Returns true if this pattern set contains the given point-set or pattern """
+        return item in self._contents_set
 
     def get_pattern(self, pattern_id):
         """

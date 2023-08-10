@@ -75,3 +75,16 @@ class TestPatternSet:
         assert point_set.piece_name == piece_name
         patterns = pattern_set[0][1]
         assert 6 == len(patterns)
+
+    def test_containment(self):
+        pattern_set_path = Path(os.path.dirname(os.path.realpath(__file__))) / 'resources/pattern_set_musicxml'
+        pattern_set = PatternSet.from_path(pattern_set_path)
+
+        for i in range(len(pattern_set)):
+            assert pattern_set[i][0] in pattern_set
+
+            for occs in pattern_set[i][1]:
+                for p in occs:
+                    assert p in pattern_set
+
+        assert Pattern2d([Point2d(1.0, 1.0), Point2d(2.0, 2.0)], 'A', 'source', '') not in pattern_set
