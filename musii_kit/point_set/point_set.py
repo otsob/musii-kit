@@ -137,7 +137,7 @@ class PointSet2d:
         else:
             self._id = str(uuid.uuid1())
 
-        self.has_expanded_repetitions = True
+        self.has_expanded_repetitions = has_expanded_repetitions
 
     @property
     def id(self):
