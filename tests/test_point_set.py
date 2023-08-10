@@ -328,7 +328,7 @@ class TestPointSetIO:
         assert original.pitch_type == read_ps.pitch_type
         assert np.allclose(original.as_numpy(), read_ps.as_numpy())
 
-    def test_repeats_are_correctly_unrolled(self):
+    def test_repeats_are_correctly_expanded(self):
         point_set = read_musicxml(self.test_path / 'resources/point-set-reps.musicxml', expand_repetitions=True)
         assert point_set.has_expanded_repetitions
         assert len(point_set) == 8
