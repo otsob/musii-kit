@@ -488,6 +488,19 @@ class PointSet2d:
 
         return pattern_start, pattern_end
 
+    def __eq__(self, other):
+        """
+        Returns true if this point-set is equal to other point-set in the contained points.
+        Metadata is ignored.
+        """
+        return np.array_equal(self.as_numpy()[:, 0:2], other.as_numpy()[:, 0:2])
+
+    def __hash__(self):
+        """
+        Returns the hash for this point-set based solely on the points contained (metadata is ignored).
+        """
+        return hash(str(self.as_numpy()[:, 0:2]))
+
     @staticmethod
     def __intersect(a_1, a_2, b_1, b_2):
         i_1 = max(a_1, b_1)
