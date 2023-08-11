@@ -61,6 +61,27 @@ class TestPointSet2d:
         assert Point2d(0.0, 21.0) == intersection[0]
         assert Point2d(1.0, 20.0) == intersection[1]
 
+    def test_given_equal_point_sets_then_union_equals_original(self):
+        point_set_a = PointSet2d(self.test_points, piece_name='Test piece', dtype=float)
+        point_set_b = PointSet2d(self.test_points, piece_name='Test piece', dtype=float)
+
+        union = point_set_a | point_set_b
+        assert union == point_set_a
+        assert union == point_set_b
+
+    def test_given_point_sets_with_shared_point_union_is_correct(self):
+        point_set_a = PointSet2d(self.test_points, piece_name='Test piece', dtype=float)
+        point_set_b = PointSet2d([Point2d(1.0, 20.0), Point2d(0.0, 21.0), Point2d(2.0, 20.0), Point2d(10.0, 10.0)],
+                                 piece_name='Test piece', dtype=float)
+
+        union = point_set_a | point_set_b
+        assert len(union) == len(point_set_a) + 1
+        assert Point2d(0.0, 21.0) == union[0]
+        assert Point2d(1.0, 20.0) == union[1]
+        assert Point2d(2.0, 20.0) == union[2]
+        assert Point2d(2.0, 21.0) == union[3]
+        assert Point2d(10.0, 10.0) == union[4]
+
     def test_given_range_within_point_set_then_point_are_returned(self):
         point_set = PointSet2d(self.test_points, piece_name='Test piece', dtype=float)
         points_in_range = point_set.get_range(1.0, 2.0)
@@ -75,7 +96,7 @@ class TestPointSet2d:
                                Point2d(4.0, 21.0)], piece_name='Test piece', dtype=float)
 
         scaled = point_set.time_scaled(2.0)
-        assert expected.equals_in_points(scaled)
+        assert expected == scaled
         assert expected.piece_name == scaled.piece_name
         assert expected.dtype == scaled.dtype
 
@@ -152,34 +173,26 @@ class TestPattern2d:
         pattern_b = Pattern2d([Point2d(1.0, 20.0), Point2d(1.00000001, 20.0), Point2d(0.0, 21.0)], 'B', 'Analyst',
                               dtype=float)
 
-        assert pattern_a.equals_in_points(pattern_a)
-        assert pattern_a.equals_in_points(pattern_b)
+        assert pattern_a == pattern_a
+        assert pattern_a == pattern_b
+        assert pattern_b == pattern_a
 
     def test_given_unequal_patterns_equals_returns_false(self):
         pattern_a = Pattern2d(self.test_points, 'A', 'Analyst', dtype=float)
         pattern_b = Pattern2d([Point2d(1.0000001, 20.0), Point2d(1.0, 21.0), Point2d(0.0, 21.0)], 'B', 'Analyst',
                               dtype=float)
 
-        assert not pattern_a.equals_in_points(pattern_b)
+        assert pattern_a != pattern_b
 
     def test_given_time_scaling_factor_then_pattern_is_scaled(self):
         pattern = Pattern2d(self.test_points, 'A', 'Analyst', dtype=float)
         expected = Pattern2d([Point2d(2.0, 20.0), Point2d(0.0, 21.0)], 'A', 'Analyst', dtype=float)
 
         scaled = pattern.time_scaled(2.0)
-        assert expected.equals_in_points(scaled)
+        assert expected == scaled
         assert expected.label == scaled.label
         assert expected.source == scaled.source
         assert expected.dtype == scaled.dtype
-
-    def test_given_equal_pattern_then_equals_true(self):
-        pattern_a = Pattern2d([Point2d(1.0, 1.0), Point2d(2.0, 0.0), Point2d(3.5, 2.0)], 'A', 'Analyst', dtype=float)
-        pattern_b = Pattern2d([Point2d(1.0, 1.0), Point2d(2.0, 0.0), Point2d(3.5, 2.0)], 'A', 'A', dtype=float)
-
-        assert pattern_a == pattern_a
-        assert pattern_a == pattern_b
-        assert pattern_b == pattern_a
-        assert hash(pattern_a) == hash(pattern_b)
 
 
 class TestPoint2d:

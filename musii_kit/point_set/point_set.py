@@ -397,20 +397,9 @@ class PointSet2d:
 
         return PointSet2d(common_points, self.piece_name, self._dtype)
 
-    def equals_in_points(self, other):
-        """
-        Returns true if this point-set is equal to other in terms of the points it contains.
-        Other fields are ignored.
-
-
-        :param other: the point-set with which this is compared
-        :return: true if this point-set is equal to other in terms of the points it contains
-        """
-
-        onsets_match = np.array_equal(self._points[:, 0], other.as_numpy()[:, 0])
-        pitches_match = np.array_equal(self._points[:, 1], other.as_numpy()[:, 1])
-
-        return onsets_match and pitches_match
+    def __or__(self, other):
+        all_points = [p for p in self] + [p for p in other]
+        return PointSet2d(all_points, self.piece_name, self._dtype)
 
     def get_range(self, start, end) -> List[Point2d]:
         """
