@@ -679,8 +679,13 @@ class PatternOccurrences2d:
     def from_dict(input_dict):
         piece = input_dict['piece']
         pattern = Pattern2d.from_dict(input_dict['pattern'])
+        pattern.piece_name = piece
         occurrences = []
         for occ_dict in input_dict['occurrences']:
-            occurrences.append(Pattern2d.from_dict(occ_dict))
+            occ = Pattern2d.from_dict(occ_dict)
+            if not occ.piece_name:
+                occ.piece_name = piece
+
+            occurrences.append(occ)
 
         return PatternOccurrences2d(piece, pattern, occurrences)

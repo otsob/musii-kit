@@ -43,6 +43,7 @@ class PatternSet:
             pattern_occurrences = item[1]
             for occurrences in pattern_occurrences:
                 for pattern in occurrences:
+                    pattern.piece_name = point_set.piece_name
                     self._patterns[pattern.id] = pattern
                     self._contents_set.add(pattern)
 
