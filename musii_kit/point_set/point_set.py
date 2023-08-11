@@ -12,7 +12,9 @@ class Point2d:
     Represents a point in a 2-dimensional point-set.
     """
 
-    decimal_places = 5
+    # The number of decimal places used in rounding onset times.
+    # This allows matching even when using floating points for onsets.
+    decimal_places = 4
 
     def __init__(self, raw_onset_time, pitch_number, rounded_onset_time=None):
         """
