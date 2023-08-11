@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "posemirpy"
-version = "0.4.11"
+version = "0.4.12"
 description = "Python bindings for posemir"
 authors = ["Otso Björklund <otso.bjorklund@gmail.com>"]
 license = "MIT"
