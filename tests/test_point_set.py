@@ -75,7 +75,7 @@ class TestPointSet2d:
                                Point2d(4.0, 21.0)], piece_name='Test piece', dtype=float)
 
         scaled = point_set.time_scaled(2.0)
-        assert expected.equals_in_points(scaled)
+        assert expected == scaled
         assert expected.piece_name == scaled.piece_name
         assert expected.dtype == scaled.dtype
 
@@ -152,34 +152,26 @@ class TestPattern2d:
         pattern_b = Pattern2d([Point2d(1.0, 20.0), Point2d(1.00000001, 20.0), Point2d(0.0, 21.0)], 'B', 'Analyst',
                               dtype=float)
 
-        assert pattern_a.equals_in_points(pattern_a)
-        assert pattern_a.equals_in_points(pattern_b)
+        assert pattern_a == pattern_a
+        assert pattern_a == pattern_b
+        assert pattern_b == pattern_a
 
     def test_given_unequal_patterns_equals_returns_false(self):
         pattern_a = Pattern2d(self.test_points, 'A', 'Analyst', dtype=float)
         pattern_b = Pattern2d([Point2d(1.0000001, 20.0), Point2d(1.0, 21.0), Point2d(0.0, 21.0)], 'B', 'Analyst',
                               dtype=float)
 
-        assert not pattern_a.equals_in_points(pattern_b)
+        assert pattern_a != pattern_b
 
     def test_given_time_scaling_factor_then_pattern_is_scaled(self):
         pattern = Pattern2d(self.test_points, 'A', 'Analyst', dtype=float)
         expected = Pattern2d([Point2d(2.0, 20.0), Point2d(0.0, 21.0)], 'A', 'Analyst', dtype=float)
 
         scaled = pattern.time_scaled(2.0)
-        assert expected.equals_in_points(scaled)
+        assert expected == scaled
         assert expected.label == scaled.label
         assert expected.source == scaled.source
         assert expected.dtype == scaled.dtype
-
-    def test_given_equal_pattern_then_equals_true(self):
-        pattern_a = Pattern2d([Point2d(1.0, 1.0), Point2d(2.0, 0.0), Point2d(3.5, 2.0)], 'A', 'Analyst', dtype=float)
-        pattern_b = Pattern2d([Point2d(1.0, 1.0), Point2d(2.0, 0.0), Point2d(3.5, 2.0)], 'A', 'A', dtype=float)
-
-        assert pattern_a == pattern_a
-        assert pattern_a == pattern_b
-        assert pattern_b == pattern_a
-        assert hash(pattern_a) == hash(pattern_b)
 
 
 class TestPoint2d:
