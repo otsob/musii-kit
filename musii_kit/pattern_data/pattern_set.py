@@ -67,6 +67,15 @@ class PatternSet:
         """
         return self._point_sets[point_set_id]
 
+    def get_point_set_by_name(self, piece_name):
+        """
+        Returns the point-set with the given piece name.
+
+        :param piece_name: the piece name of the point-set to return
+        :return: the point-set with the given piece name
+        """
+        return self.__get_elem_by_piece_name(piece_name)[0]
+
     def add_patterns(self, patterns: PatternOccurrences2d, point_set_id=None, set_piece_name=False):
         """
         Adds the given pattern occurrences to the corresponding piece in this pattern set.
