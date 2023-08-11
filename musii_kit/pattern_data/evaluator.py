@@ -39,7 +39,7 @@ class Evaluator:
     def __group_by_composition(dataset: PatternSet):
         grouping = {}
         for i in range(len(dataset)):
-            grouping[dataset[i][0]] = (dataset[i][1], dataset[i][2])
+            grouping[dataset[i][0].piece_name] = dataset[i]
 
         return grouping
 
@@ -54,19 +54,17 @@ class Evaluator:
         :return: a pandas data frame of the results with a row for each evaluated piece and a column for each metric
         """
 
-        ground_truth = Evaluator.__group_by_composition(self._ground_truth)
-        evaluated_data = Evaluator.__group_by_composition(dataset)
-        common_pieces = ground_truth.keys() & evaluated_data.keys()
+        common_pieces = self._ground_truth.get_piece_names() & dataset.get_piece_names()
 
-        Evaluator.print_excluded_pieces(common_pieces, evaluated_data, ground_truth)
+        Evaluator.print_excluded_pieces(common_pieces, self._ground_truth.get_piece_names(), dataset.get_piece_names())
 
         evaluation_result = {}
 
         with ProcessPoolExecutor(max_workers=self._process_count) as executor:
             piece_result_futures = {}
             for piece in common_pieces:
-                gt_patterns = ground_truth[piece][1]
-                output_patterns = evaluated_data[piece][1]
+                gt_patterns = self._ground_truth.get_item_by_piece_name(piece)[1]
+                output_patterns = dataset.get_item_by_piece_name(piece)[1]
 
                 piece_result_futures[piece] = dispatch_piece_result_computations(executor, gt_patterns, output_patterns)
 
@@ -103,8 +101,8 @@ class Evaluator:
 
     @staticmethod
     def print_excluded_pieces(common_pieces, evaluated_data, ground_truth):
-        excluded_gt_pieces = sorted(set(ground_truth.keys()).difference(common_pieces))
-        excluded_evaluation_pieces = sorted(set(evaluated_data.keys()).difference(common_pieces))
+        excluded_gt_pieces = sorted(set(ground_truth).difference(common_pieces))
+        excluded_evaluation_pieces = sorted(set(evaluated_data).difference(common_pieces))
         if excluded_gt_pieces:
             listing = '\n\t'.join(excluded_gt_pieces)
             print(f'Ground truth pieces not found in given dataset:\n\t{listing}')

@@ -36,6 +36,7 @@ class PatternSet:
         self._point_sets = {}
         self._patterns = {}
         self._contents_set = set()
+        self._name_to_item = {}
         for item in self._data:
             point_set = item[0]
             self._contents_set.add(point_set)
@@ -47,9 +48,14 @@ class PatternSet:
                     self._patterns[pattern.id] = pattern
                     self._contents_set.add(pattern)
 
+            self._name_to_item[point_set.piece_name] = item
+
     def __contains__(self, item):
         """ Returns true if this pattern set contains the given point-set or pattern """
         return item in self._contents_set
+
+    def get_piece_names(self):
+        return self._name_to_item.keys()
 
     def get_pattern(self, pattern_id):
         """
@@ -74,7 +80,7 @@ class PatternSet:
         :param piece_name: the piece name of the point-set to return
         :return: the point-set with the given piece name
         """
-        return self.__get_elem_by_piece_name(piece_name)[0]
+        return self.get_item_by_piece_name(piece_name)[0]
 
     def add_patterns(self, patterns: PatternOccurrences2d, point_set_id=None, set_piece_name=False):
         """
@@ -87,28 +93,25 @@ class PatternSet:
         :param set_piece_name: set the piece_name of the patterns to match the piece with which they are associated
         """
         if point_set_id:
-            elem = self.__get_elem_by_point_set_id(point_set_id)
+            item = self.__get_item_by_point_set_id(point_set_id)
         else:
             piece_name = patterns.pattern.piece_name
-            elem = self.__get_elem_by_piece_name(piece_name)
+            item = self.get_item_by_piece_name(piece_name)
 
         if set_piece_name:
             for p in patterns:
-                p.piece_name = elem[0].piece_name
+                p.piece_name = item[0].piece_name
 
-        elem[1].append(patterns)
+        item[1].append(patterns)
 
-    def __get_elem_by_piece_name(self, piece_name):
-        for elem in self:
-            if elem[0].piece_name == piece_name:
-                return elem
+    def get_item_by_piece_name(self, piece_name):
+        """ Returns the item (point-set, [pattern occurrences]) for the piece with the given name. """
+        return self._name_to_item[piece_name]
 
-        raise ValueError(f'No piece with name {piece_name}')
-
-    def __get_elem_by_point_set_id(self, ps_id):
-        for elem in self:
-            if elem[0].id == ps_id:
-                return elem
+    def __get_item_by_point_set_id(self, ps_id):
+        for item in self:
+            if item[0].id == ps_id:
+                return item
 
         raise ValueError(f'No piece with point-set-id {ps_id}')
 
@@ -214,7 +217,7 @@ class PatternSet:
             pattern_contents = input_dict[piece_name]['patterns']
 
             if isinstance(pattern_contents, list):
-                patterns = [PatternOccurrences2d.from_dict(elem) for elem in pattern_contents]
+                patterns = [PatternOccurrences2d.from_dict(item) for item in pattern_contents]
             else:
                 patterns = [PatternOccurrences2d.from_dict(pattern_contents)]
 
