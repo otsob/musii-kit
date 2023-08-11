@@ -61,6 +61,27 @@ class TestPointSet2d:
         assert Point2d(0.0, 21.0) == intersection[0]
         assert Point2d(1.0, 20.0) == intersection[1]
 
+    def test_given_equal_point_sets_then_union_equals_original(self):
+        point_set_a = PointSet2d(self.test_points, piece_name='Test piece', dtype=float)
+        point_set_b = PointSet2d(self.test_points, piece_name='Test piece', dtype=float)
+
+        union = point_set_a | point_set_b
+        assert union == point_set_a
+        assert union == point_set_b
+
+    def test_given_point_sets_with_shared_point_union_is_correct(self):
+        point_set_a = PointSet2d(self.test_points, piece_name='Test piece', dtype=float)
+        point_set_b = PointSet2d([Point2d(1.0, 20.0), Point2d(0.0, 21.0), Point2d(2.0, 20.0), Point2d(10.0, 10.0)],
+                                 piece_name='Test piece', dtype=float)
+
+        union = point_set_a | point_set_b
+        assert len(union) == len(point_set_a) + 1
+        assert Point2d(0.0, 21.0) == union[0]
+        assert Point2d(1.0, 20.0) == union[1]
+        assert Point2d(2.0, 20.0) == union[2]
+        assert Point2d(2.0, 21.0) == union[3]
+        assert Point2d(10.0, 10.0) == union[4]
+
     def test_given_range_within_point_set_then_point_are_returned(self):
         point_set = PointSet2d(self.test_points, piece_name='Test piece', dtype=float)
         points_in_range = point_set.get_range(1.0, 2.0)

@@ -397,6 +397,10 @@ class PointSet2d:
 
         return PointSet2d(common_points, self.piece_name, self._dtype)
 
+    def __or__(self, other):
+        all_points = [p for p in self] + [p for p in other]
+        return PointSet2d(all_points, self.piece_name, self._dtype)
+
     def get_range(self, start, end) -> List[Point2d]:
         """
         Returns the points in the given time-range (inclusive) in ascending lexicographic order.
