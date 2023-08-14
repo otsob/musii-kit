@@ -517,6 +517,47 @@ class PointSet2d:
 
         return i_1, i_2
 
+    def get_pattern_notation(self, pattern):
+        """
+        Returns the music notation for the given pattern as a music21 stream.
+
+        :param pattern: the pattern for which to return the notation
+        :return: the music notation for the given point pattern
+        :raise ValueError: if this point-set doesn't have a score
+        """
+        if not self.score:
+            raise ValueError('Cannot retrieve score region because score is None')
+
+        first_measure, last_measure = self.get_measure_range(pattern)
+        measures = self.score.measures(first_measure, last_measure)
+        first_in_selection = measures.flatten().notes.first()
+        global_offset = first_in_selection.getOffsetBySite(self.score.flatten()) - first_in_selection.offset
+
+        stream = deepcopy(measures)
+        flattened_notes = stream.flatten().notes.stream()
+        pattern_points = set((p for p in pattern))
+
+        for elem in flattened_notes:
+            onset_time = round(elem.offset + global_offset, Point2d.decimal_places)
+
+            if isinstance(elem, m21.note.Note):
+                if Point2d(onset_time, self.pitch_extractor(elem.pitch)) not in pattern_points:
+                    flattened_notes.replace(elem, m21.note.Rest(elem.duration.quarterLength), allDerived=True)
+            if isinstance(elem, m21.chord.Chord) and not isinstance(elem, m21.harmony.ChordSymbol):
+                notes_to_remove = []
+
+                for note in elem:
+                    if Point2d(onset_time, self.pitch_extractor(note.pitch)) not in pattern_points:
+                        notes_to_remove.append(note)
+
+                if len(notes_to_remove) == len(elem.notes):
+                    flattened_notes.replace(elem, m21.note.Rest(elem.duration.quarterLength), allDerived=True)
+                else:
+                    for n in notes_to_remove:
+                        elem.remove(n)
+
+        return stream
+
     def get_score_region(self, pattern, boundaries='exclude'):
         """
         Returns the region (timespan) of the score where the pattern occurs as a music21 stream.
