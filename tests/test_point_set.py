@@ -111,6 +111,20 @@ class TestPointSet2d:
         assert measure_range[0] == 1
         assert measure_range[1] == 2
 
+    def test_given_pattern_notations_is_correctly_retrieved(self):
+        point_set = read_musicxml(self.test_path / 'resources/test-point-set.musicxml')
+        pattern = Pattern2d([Point2d(2.0, 60),
+                             Point2d(4.0, 72.0),
+                             Point2d(4.33333333, 74.0),
+                             Point2d(4.66666667, 76.0)], label='A', source='Manual query')
+
+        region = point_set.get_pattern_notation(pattern)
+
+        for note in region.flatten().notes:
+            print(note)
+
+        assert len(region.flatten().notes) == 4
+
     def test_given_pattern_score_region_with_inclusion_is_correctly_retrieved(self):
         point_set = read_musicxml(self.test_path / 'resources/test-point-set.musicxml')
         pattern = Pattern2d([Point2d(2.0, 60),
