@@ -89,9 +89,8 @@ class ScoreVisualization:
             note = self._point_set.get_note(p)
             note.style.color = color
             self._marked_notes.append(note)
-            if note.measureNumber:
-                self._first_measure = min(self._first_measure, note.measureNumber)
-                self._last_measure = max(self._last_measure, note.measureNumber)
+
+        self._first_measure, self._last_measure = self._point_set.get_measure_range(pattern)
 
     def mark_occurrences(self, pattern_occurrences: PatternOccurrences2d, pattern_color='red',
                          occurrence_colors=['red']):

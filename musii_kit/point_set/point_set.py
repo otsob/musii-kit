@@ -1,4 +1,3 @@
-import math
 import uuid
 from copy import deepcopy
 from typing import List
@@ -442,25 +441,41 @@ class PointSet2d:
 
         return scaled
 
+    def get_measure(self, point):
+        """ Returns the number of the measure in which the point is located.
+         Requires this point-set to either have a score or the measure line positions.
+
+         :param point: the point for which to return the measure number"""
+
+        if self.score:
+            note = self.get_note(point)
+            if note.measureNumber:
+                return note.measureNumber
+
+        # Compute the measure number from the measure line positions if the score is missing
+        # or for some reason the music21 note element does not have the measure number set (which
+        # sometimes happens).
+        measure = 0
+        for i in range(len(self.measure_line_positions) - 1):
+            m_start = self.measure_line_positions[i]
+            m_end = self.measure_line_positions[i + 1]
+
+            # Increment measure number only after potential pickup measure
+            if 0.0 <= m_start:
+                measure += 1
+
+            if m_start <= point.onset_time < m_end:
+                return measure
+
+        raise ValueError('No score or measure line positions, cannot return measure of point')
+
     def get_measure_range(self, pattern):
         """
         Returns the range of measures (inclusive) in the score associated with this point-set for the given pattern.
         :param pattern: the pattern for which to retrieve the measure range.
         :return: a pair (first, last) of measure numbers
-        :raise ValueError: if this point-set doesn't have a score
         """
-        if not self.score:
-            raise ValueError('Cannot retrieve score region because score is None')
-
-        first = math.inf
-        last = -math.inf
-
-        for p in pattern:
-            note_elem = self.get_note(p)
-            first = min(first, note_elem.measureNumber)
-            last = max(last, note_elem.measureNumber)
-
-        return first, last
+        return self.get_measure(pattern[0]), self.get_measure(pattern[-1])
 
     def get_pattern_span(self, pattern):
         """
