@@ -37,6 +37,7 @@ class PatternSet:
         self._patterns = {}
         self._contents_set = set()
         self._name_to_item = {}
+        self._pat_id_to_occurrences = {}
         for item in self._data:
             point_set = item[0]
             self._contents_set.add(point_set)
@@ -46,6 +47,7 @@ class PatternSet:
                 for pattern in occurrences:
                     pattern.piece_name = point_set.piece_name
                     self._patterns[pattern.id] = pattern
+                    self._pat_id_to_occurrences[pattern.id] = occurrences
                     self._contents_set.add(pattern)
 
             self._name_to_item[point_set.piece_name] = item
@@ -53,6 +55,15 @@ class PatternSet:
     def __contains__(self, item):
         """ Returns true if this pattern set contains the given point-set or pattern """
         return item in self._contents_set
+
+    def get_occurrences(self, pattern_id) -> PatternOccurrences2d:
+        """
+        Returns the pattern occurrences object containing the pattern with the given id.
+
+        :param pattern_id: the id of the pattern for which to get the pattern occurrences
+        :return: the pattern occurrences object containing the pattern with the given id
+        """
+        return self._pat_id_to_occurrences[pattern_id]
 
     def get_piece_names(self):
         return self._name_to_item.keys()
@@ -103,6 +114,11 @@ class PatternSet:
                 p.piece_name = item[0].piece_name
 
         item[1].append(patterns)
+
+        # Update the helper structures
+        for p in patterns:
+            self._pat_id_to_occurrences[p.id] = patterns
+            self._contents_set.add(p)
 
     def get_item_by_piece_name(self, piece_name):
         """ Returns the item (point-set, [pattern occurrences]) for the piece with the given name. """
