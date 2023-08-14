@@ -240,15 +240,15 @@ class PointSet2d:
         return True
 
     @staticmethod
-    def _read_elem_to_points(elem, measure_offset, points, pitch_extractor):
+    def _read_elem_to_points(elem, measure_offset, points_and_notes, pitch_extractor):
         if PointSet2d._is_note_onset(elem):
             point = Point2d(measure_offset + elem.offset, pitch_extractor(elem.pitch))
-            points[point] = elem
+            points_and_notes[point] = elem
         if isinstance(elem, m21.chord.Chord) and not isinstance(elem, m21.harmony.ChordSymbol):
             for note in elem:
                 if PointSet2d._is_note_onset(note):
                     point = Point2d(measure_offset + elem.offset, pitch_extractor(note.pitch))
-                    points[point] = note
+                    points_and_notes[point] = note
 
     @staticmethod
     def from_numpy(points_array, piece_name=None, pitch_type=None):
