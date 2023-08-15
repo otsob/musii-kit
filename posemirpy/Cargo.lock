@@ -85,7 +85,7 @@ checksum = "b4668fb0ea861c1df094127ac5f1da3409a82116a4ba74fca2e58ef927159bb3"
 
 [[package]]
 name = "lock_api"
-version = "0.4.17"
+version = "0.4.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c1cc9717a20b1bb222f333e6a92fd32f7d8a18ddc5a3191a11af45dcbf4dcd16"
 dependencies = [
@@ -215,7 +215,7 @@ dependencies = [
 
 [[package]]
 name = "posemirpy"
-version = "0.4.17"
+version = "0.4.18"
 dependencies = [
  "numpy",
  "posemir",
