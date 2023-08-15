@@ -526,7 +526,8 @@ class PointSet2d:
         first_measure, last_measure = self.get_measure_range(pattern)
         measures = self.score.measures(first_measure, last_measure)
         first_in_selection = measures.flatten().notes.first()
-        global_offset = first_in_selection.getOffsetBySite(self.score.flatten()) - first_in_selection.offset
+
+        global_offset = self.__compute_global_offset(first_in_selection)
 
         stream = deepcopy(measures)
         flattened_notes = stream.flatten().notes.stream()
@@ -570,7 +571,8 @@ class PointSet2d:
         first_measure, last_measure = self.get_measure_range(pattern)
         measures = self.score.measures(first_measure, last_measure)
         first_in_selection = measures.flatten().notes.first()
-        global_offset = first_in_selection.getOffsetBySite(self.score.flatten()) - first_in_selection.offset
+
+        global_offset = self.__compute_global_offset(first_in_selection)
 
         pattern_start, pattern_end = self.get_pattern_span(pattern)
 
@@ -608,6 +610,14 @@ class PointSet2d:
                 flattened_notes.replace(note, m21.note.Rest(note.duration.quarterLength), allDerived=True)
 
         return stream
+
+    def __compute_global_offset(self, first_in_selection):
+        """ Returns the offset from the beginning of the first full measure in a music21 score. """
+        pickup_measure = self.score.measure(0)
+        pickup_duration = pickup_measure.quarterLength if pickup_measure else 0.0
+        global_offset = first_in_selection.getOffsetBySite(
+            self.score.flatten()) - first_in_selection.offset - pickup_duration
+        return global_offset
 
 
 class Pattern2d(PointSet2d):

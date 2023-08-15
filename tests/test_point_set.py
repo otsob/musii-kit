@@ -288,7 +288,7 @@ class TestPointSetIO:
         Point2d(4.0, 55.0)],
         piece_name='Point-set test',
         quarter_length=1.0,
-        measure_line_positions=[0.0, 4.0, 8.0])
+        measure_line_positions=[-1.0, 0.0, 4.0, 8.0])
 
     def test_read_chromatic_point_set_from_musicxml(self):
         point_set = read_musicxml(self.test_path / 'resources/test-point-set.musicxml')
@@ -326,7 +326,7 @@ class TestPointSetIO:
         Point2d(4.0, 57.0)],
         piece_name='Point-set test',
         quarter_length=1.0,
-        measure_line_positions=[0.0, 4.0, 8.0])
+        measure_line_positions=[-1.0, 0.0, 4.0, 8.0])
 
     def test_read_morphetic_point_set_from_musicxml(self):
         point_set = read_musicxml(self.test_path / 'resources/test-point-set.musicxml',
