@@ -120,9 +120,6 @@ class TestPointSet2d:
 
         region = point_set.get_pattern_notation(pattern)
 
-        for note in region.flatten().notes:
-            print(note)
-
         assert len(region.flatten().notes) == 4
 
     def test_given_pattern_score_region_with_inclusion_is_correctly_retrieved(self):
