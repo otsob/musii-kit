@@ -455,17 +455,12 @@ class PointSet2d:
         # Compute the measure number from the measure line positions if the score is missing
         # or for some reason the music21 note element does not have the measure number set (which
         # sometimes happens).
-        measure = 0
         for i in range(len(self.measure_line_positions) - 1):
             m_start = self.measure_line_positions[i]
             m_end = self.measure_line_positions[i + 1]
 
-            # Increment measure number only after potential pickup measure
-            if 0.0 <= m_start:
-                measure += 1
-
             if m_start <= point.onset_time < m_end:
-                return measure
+                return i
 
         raise ValueError('No score or measure line positions, cannot return measure of point')
 
