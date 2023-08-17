@@ -1,5 +1,6 @@
 import uuid
 from copy import deepcopy
+from operator import itemgetter
 from typing import List
 
 import music21 as m21
@@ -520,6 +521,47 @@ class PointSet2d:
             return None
 
         return i_1, i_2
+
+    @staticmethod
+    def __get_part_id(note):
+        measure = next(m for m in note.sites if isinstance(m, m21.stream.Measure))
+        part = next(p for p in measure.sites if isinstance(p, m21.stream.Part))
+        return part.id
+
+    def get_pattern_notes(self, pattern, discard_unisons=True):
+        """
+        Returns the notes in the given pattern as a list.
+
+        :param pattern: the pattern for which the notes are retrieved
+        :param discard_unisons: set to true to discard unison notes by preferring notes from a part that is more common
+        :return: the notes in the given pattern as a list
+        """
+        pattern_notes = []
+
+        if discard_unisons:
+            part_counts = {}
+
+            for point in pattern:
+                notes = self.get_notes(point)
+                for note in notes:
+                    part_id = self.__get_part_id(note)
+                    if part_id not in part_counts:
+                        part_counts[part_id] = 0
+
+                    part_counts[part_id] += 1
+
+            for point in pattern:
+                notes = self.get_notes(point)
+                if len(notes) == 1:
+                    pattern_notes.append(notes[0])
+                else:
+                    note = max(((note, part_counts[self.__get_part_id(note)]) for note in notes), key=itemgetter(1))[0]
+                    pattern_notes.append(note)
+        else:
+            for point in pattern:
+                pattern_notes += self.get_notes(point)
+
+        return pattern_notes
 
     def get_pattern_notation(self, pattern):
         """

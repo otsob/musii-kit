@@ -152,6 +152,25 @@ class TestPointSet2d:
         region = point_set.get_score_region(pattern, boundaries='exclude')
         assert len(region.flatten().notes) == 6
 
+    def test_pattern_notes_with_unisons_are_correctly_returned(self):
+        point_set = read_musicxml(self.test_path / 'resources/test-pattern-extraction.musicxml')
+        pattern = Pattern2d([Point2d(0.0, 62.0), Point2d(2.0, 60), Point2d(4.0, 62.0)], 'A', 'manual')
+        pattern_notes = point_set.get_pattern_notes(pattern, discard_unisons=False)
+        assert len(pattern_notes) == 4
+        assert pattern_notes[0].nameWithOctave == 'D4'
+        assert pattern_notes[1].nameWithOctave == 'C4'
+        assert pattern_notes[2].nameWithOctave == 'C4'
+        assert pattern_notes[3].nameWithOctave == 'D4'
+
+    def test_pattern_notes_without_unisons_are_correctly_returned(self):
+        point_set = read_musicxml(self.test_path / 'resources/test-pattern-extraction.musicxml')
+        pattern = Pattern2d([Point2d(0.0, 62.0), Point2d(2.0, 60), Point2d(4.0, 62.0)], 'A', 'manual')
+        pattern_notes = point_set.get_pattern_notes(pattern, discard_unisons=True)
+        assert len(pattern_notes) == 3
+        assert pattern_notes[0].nameWithOctave == 'D4'
+        assert pattern_notes[1].nameWithOctave == 'C4'
+        assert pattern_notes[2].nameWithOctave == 'D4'
+
 
 class TestPattern2d:
     test_points = [Point2d(1.0000001, 20.0), Point2d(1.0, 20.0), Point2d(0.0, 21.0)]
