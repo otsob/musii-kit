@@ -524,8 +524,14 @@ class PointSet2d:
 
     @staticmethod
     def __get_part_id(note):
-        measure = next(m for m in note.sites if isinstance(m, m21.stream.Measure))
-        part = next(p for p in measure.sites if isinstance(p, m21.stream.Part))
+
+        voice = note.sites.getObjByClass('Voice')
+        if voice:
+            measure = voice.sites.getObjByClass('Measure')
+        else:
+            measure = note.sites.getObjByClass('Measure')
+
+        part = measure.sites.getObjByClass('Part')
         return part.id
 
     def get_pattern_notes(self, pattern, discard_unisons=True):
@@ -536,32 +542,40 @@ class PointSet2d:
         :param discard_unisons: set to true to discard unison notes by preferring notes from a part that is more common
         :return: the notes in the given pattern as a list
         """
-        pattern_notes = []
+        return [t[2] for t in self.__get_point_part_note_triples(pattern, discard_unisons)]
+
+    def __get_point_part_note_triples(self, pattern, discard_unisons):
+        triples = []
 
         if discard_unisons:
-            part_counts = {}
-
-            for point in pattern:
-                notes = self.get_notes(point)
-                for note in notes:
-                    part_id = self.__get_part_id(note)
-                    if part_id not in part_counts:
-                        part_counts[part_id] = 0
-
-                    part_counts[part_id] += 1
+            part_counts = self.__part_counts(pattern)
 
             for point in pattern:
                 notes = self.get_notes(point)
                 if len(notes) == 1:
-                    pattern_notes.append(notes[0])
+                    note = notes[0]
+                    triples.append((point, self.__get_part_id(note), note))
                 else:
                     note = max(((note, part_counts[self.__get_part_id(note)]) for note in notes), key=itemgetter(1))[0]
-                    pattern_notes.append(note)
+                    triples.append((point, self.__get_part_id(note), note))
         else:
             for point in pattern:
-                pattern_notes += self.get_notes(point)
+                triples += [(point, self.__get_part_id(note), note) for note in self.get_notes(point)]
 
-        return pattern_notes
+        return triples
+
+    def __part_counts(self, pattern):
+        part_counts = {}
+        for point in pattern:
+            notes = self.get_notes(point)
+            for note in notes:
+                part_id = self.__get_part_id(note)
+                if part_id not in part_counts:
+                    part_counts[part_id] = 0
+
+                part_counts[part_id] += 1
+
+        return part_counts
 
     def get_pattern_notation(self, pattern):
         """
@@ -582,19 +596,25 @@ class PointSet2d:
 
         stream = deepcopy(measures)
         flattened_notes = stream.flatten().notes.stream()
-        pattern_points = set((p for p in pattern))
+
+        # As the equality and hash for music21 notes is not usable for this purpose,
+        # use triples of onset time, part id, and notename with octave for checking membership in pattern.
+        onset_part_pitch_triples = set((t[0].onset_time, t[1], t[2].nameWithOctave) for t in
+                                       self.__get_point_part_note_triples(pattern, discard_unisons=False))
 
         for elem in flattened_notes:
             onset_time = round(elem.offset + global_offset, Point2d.decimal_places)
 
             if isinstance(elem, m21.note.Note):
-                if Point2d(onset_time, self.pitch_extractor(elem.pitch)) not in pattern_points:
+                if (onset_time, self.__get_part_id(elem), elem.nameWithOctave) not in onset_part_pitch_triples:
                     flattened_notes.replace(elem, m21.note.Rest(elem.duration.quarterLength), allDerived=True)
             if isinstance(elem, m21.chord.Chord) and not isinstance(elem, m21.harmony.ChordSymbol):
                 notes_to_remove = []
 
                 for note in elem:
-                    if Point2d(onset_time, self.pitch_extractor(note.pitch)) not in pattern_points:
+                    # Get the part id using the chord because notes in chords for not have the containing
+                    # measure in their sites.
+                    if (onset_time, self.__get_part_id(elem), note.nameWithOctave) not in onset_part_pitch_triples:
                         notes_to_remove.append(note)
 
                 if len(notes_to_remove) == len(elem.notes):
