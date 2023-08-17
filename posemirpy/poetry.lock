@@ -2,25 +2,25 @@
 
 [[package]]
 name = "maturin"
-version = "1.0.1"
+version = "1.2.2"
 description = "Build and publish crates with pyo3, rust-cpython and cffi bindings as well as rust binaries as python packages"
 category = "dev"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "maturin-1.0.1-py3-none-linux_armv6l.whl", hash = "sha256:10097e2602330c0b9db16d7dfd002476f5e5cf99df58ba2f3abc6de64a69e9a6"},
-    {file = "maturin-1.0.1-py3-none-macosx_10_7_x86_64.whl", hash = "sha256:9ecebccb111c9c870fb2f5eee17518fe106f676227bb16f204a51e7a162aceec"},
-    {file = "maturin-1.0.1-py3-none-macosx_10_9_x86_64.macosx_11_0_arm64.macosx_10_9_universal2.whl", hash = "sha256:b39f9a42b3c8242e3f3ab990bd03ba989c6c07e4de9e21fcf877a2418119d445"},
-    {file = "maturin-1.0.1-py3-none-manylinux_2_12_i686.manylinux2010_i686.musllinux_1_1_i686.whl", hash = "sha256:c0b1efa47f8b7d15bc5945159764ce57316f9d1bfb7c8caa07cebdd41318359b"},
-    {file = "maturin-1.0.1-py3-none-manylinux_2_12_x86_64.manylinux2010_x86_64.musllinux_1_1_x86_64.whl", hash = "sha256:d392ec0578d9e6f03914837cef7bbb264d5708807e0b48176b6ff0b50083ba7c"},
-    {file = "maturin-1.0.1-py3-none-manylinux_2_17_aarch64.manylinux2014_aarch64.musllinux_1_1_aarch64.whl", hash = "sha256:d271b24febbfc020561984b1acdfc39b132df21f4e42d7af0fe274ea738c8000"},
-    {file = "maturin-1.0.1-py3-none-manylinux_2_17_armv7l.manylinux2014_armv7l.musllinux_1_1_armv7l.whl", hash = "sha256:8d88d1595d7514c27df96d5f4fe3dc5f24288528a746439403f27c3b448fca16"},
-    {file = "maturin-1.0.1-py3-none-manylinux_2_17_ppc64le.manylinux2014_ppc64le.musllinux_1_1_ppc64le.whl", hash = "sha256:04c0279dd0d6ccd317018bd1a43f52cbda715822537ae1a68015c9171f18b2fd"},
-    {file = "maturin-1.0.1-py3-none-manylinux_2_17_s390x.manylinux2014_s390x.whl", hash = "sha256:787bb56c80eda482ece2dd4788d479dbd0e74d981b2e2c538228365c19290fb7"},
-    {file = "maturin-1.0.1-py3-none-win32.whl", hash = "sha256:6d9b4ff7c2d501e91886b859296f5c0478fc08bc7d537a72f98a69d51ff4f519"},
-    {file = "maturin-1.0.1-py3-none-win_amd64.whl", hash = "sha256:2907b345186a83db4bbe5571830509b3031784d08958b32d2ffa7857bd473725"},
-    {file = "maturin-1.0.1-py3-none-win_arm64.whl", hash = "sha256:6b020b9abbd1e9fef468c171216dc4be053834b5bf638075264ee090a993b0b0"},
-    {file = "maturin-1.0.1.tar.gz", hash = "sha256:71fdb2dbbd5bcc60bd91ddcbe34dba9f04cc53c2add089a95a79d0d8fc8337b8"},
+    {file = "maturin-1.2.2-py3-none-linux_armv6l.whl", hash = "sha256:2313eb1a274460ccda67081cfb0870763e2f889ee514ee193442dac1e22105f8"},
+    {file = "maturin-1.2.2-py3-none-macosx_10_7_x86_64.whl", hash = "sha256:cccc3e9353f98b35c78cbd115b507c1142821461eb0ff5d4a8ff0edacbaf7478"},
+    {file = "maturin-1.2.2-py3-none-macosx_10_9_x86_64.macosx_11_0_arm64.macosx_10_9_universal2.whl", hash = "sha256:66834f24d0c89a0a921577ee405ded210fbe11b545bd09f9d03721763f8bb1a3"},
+    {file = "maturin-1.2.2-py3-none-manylinux_2_12_i686.manylinux2010_i686.musllinux_1_1_i686.whl", hash = "sha256:f383f9d5bdf3792195ff5779ed14a237c8f8e544e6b77c695308a2284f5b8b06"},
+    {file = "maturin-1.2.2-py3-none-manylinux_2_12_x86_64.manylinux2010_x86_64.musllinux_1_1_x86_64.whl", hash = "sha256:14091440544684a7b4665566fc0b6b49a7fbaaf2f7d1aa58b4892d17f7810c8d"},
+    {file = "maturin-1.2.2-py3-none-manylinux_2_17_aarch64.manylinux2014_aarch64.musllinux_1_1_aarch64.whl", hash = "sha256:8b15e7cf07d477a65e75d1fdf736f2d6321747a09972c208554fb393b1504a65"},
+    {file = "maturin-1.2.2-py3-none-manylinux_2_17_armv7l.manylinux2014_armv7l.musllinux_1_1_armv7l.whl", hash = "sha256:da4ef2548d4063fc1c734e7124edba07c1539974a2fb66c75a013fad9da8ee22"},
+    {file = "maturin-1.2.2-py3-none-manylinux_2_17_ppc64le.manylinux2014_ppc64le.musllinux_1_1_ppc64le.whl", hash = "sha256:0a04d8f45e9cc70580eb075cd192ceb3592a9ed116455a5813fd0a23fe5e85ba"},
+    {file = "maturin-1.2.2-py3-none-manylinux_2_17_s390x.manylinux2014_s390x.whl", hash = "sha256:afd11a831ae615ccd46ab1c255544168841a698cee2345002aaa82ed07f50a69"},
+    {file = "maturin-1.2.2-py3-none-win32.whl", hash = "sha256:fdbdd1411bf2b0607a83fac36488df72ace8552128f4f3a09cb28c7c3f8aab84"},
+    {file = "maturin-1.2.2-py3-none-win_amd64.whl", hash = "sha256:0178c2bddce9ea51b7bf2edc5ca8b77a3e49b634af93de46e17a45549713a5e7"},
+    {file = "maturin-1.2.2-py3-none-win_arm64.whl", hash = "sha256:9f005d85d6f7e6bb14c3d8dcd12521c95f32ffa8b305bf054328be751556ad7b"},
+    {file = "maturin-1.2.2.tar.gz", hash = "sha256:20b658cf40a788769f5b5166ce78f0789fae77ee5f7b53084a7b3d3199b090ac"},
 ]
 
 [package.dependencies]
