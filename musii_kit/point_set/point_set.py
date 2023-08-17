@@ -100,7 +100,7 @@ class PointSet2d:
         :param quarter_length: the length of a quarter note in the time units used for measuring the onset time axis
         :param measure_line_positions: optional list or array of the positions of measure lines in time
         :param score: a music21 score object associated with this point-set
-        :param point_set_id: a dict mapping the points to music21 note objects
+        :param points_to_notes: a dict mapping the points to lists of music21 note objects
         :param pitch_extractor: the pitch extractor used when creating point-set from music21 score
         :param point_set_id: the identifier of this point-set
         :param has_expanded_repetitions: set to true to indicate that this point-set has been created from a score
@@ -243,12 +243,16 @@ class PointSet2d:
     def _read_elem_to_points(elem, measure_offset, points_and_notes, pitch_extractor):
         if PointSet2d._is_note_onset(elem):
             point = Point2d(measure_offset + elem.offset, pitch_extractor(elem.pitch))
-            points_and_notes[point] = elem
+            if point not in points_and_notes:
+                points_and_notes[point] = []
+            points_and_notes[point].append(elem)
         if isinstance(elem, m21.chord.Chord) and not isinstance(elem, m21.harmony.ChordSymbol):
             for note in elem:
                 if PointSet2d._is_note_onset(note):
                     point = Point2d(measure_offset + elem.offset, pitch_extractor(note.pitch))
-                    points_and_notes[point] = note
+                    if point not in points_and_notes:
+                        points_and_notes[point] = []
+                    points_and_notes[point].append(note)
 
     @staticmethod
     def from_numpy(points_array, piece_name=None, pitch_type=None):
@@ -322,10 +326,12 @@ class PointSet2d:
         from a score, this is None."""
         return self._score
 
-    def get_note(self, point: Point2d):
+    def get_notes(self, point: Point2d):
         """
-        Returns the note element corresponding to the given point if this point-set was
-        created from a score.
+        Returns the note elements corresponding to the given point if this point-set was
+        created from a score. Typically, there is only one note corresponding to a point, but in the case
+        of unisons occurring in polyphonic music there may be multiple notes.
+
         :param point: the point for which the corresponding note element is returned
         :return: the note element corresponding to the given point if this point-set was
         created from a score
@@ -448,7 +454,7 @@ class PointSet2d:
          :param point: the point for which to return the measure number"""
 
         if self.score:
-            note = self.get_note(point)
+            note = self.get_notes(point)[0]
             if note.measureNumber:
                 return note.measureNumber
 
@@ -484,8 +490,11 @@ class PointSet2d:
             raise ValueError('Cannot retrieve score region because score is None')
 
         pattern_start = pattern[0].onset_time
-        pattern_end = max(
-            [round(p.onset_time + self.get_note(p).quarterLength, Point2d.decimal_places) for p in pattern])
+        pattern_end = pattern_start
+
+        for point in pattern:
+            pattern_end = max(
+                round(point.onset_time + note.quarterLength, Point2d.decimal_places) for note in self.get_notes(point))
 
         return pattern_start, pattern_end
 

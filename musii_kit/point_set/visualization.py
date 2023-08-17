@@ -86,9 +86,9 @@ class ScoreVisualization:
         :param color: the color to use for the pattern
         """
         for p in pattern:
-            note = self._point_set.get_note(p)
-            note.style.color = color
-            self._marked_notes.append(note)
+            for note in self._point_set.get_notes(p):
+                note.style.color = color
+                self._marked_notes.append(note)
 
         first, last = self._point_set.get_measure_range(pattern)
         self._first_measure = min(self._first_measure, first)
