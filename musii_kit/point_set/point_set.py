@@ -577,11 +577,12 @@ class PointSet2d:
 
         return part_counts
 
-    def get_pattern_notation(self, pattern):
+    def get_pattern_notation(self, pattern, discard_unisons=True):
         """
         Returns the music notation for the given pattern as a music21 stream.
 
         :param pattern: the pattern for which to return the notation
+        :param discard_unisons: set to true to avoid getting multiple notes for a point produced from a union
         :return: the music notation for the given point pattern
         :raise ValueError: if this point-set doesn't have a score
         """
@@ -600,7 +601,7 @@ class PointSet2d:
         # As the equality and hash for music21 notes is not usable for this purpose,
         # use triples of onset time, part id, and notename with octave for checking membership in pattern.
         onset_part_pitch_triples = set((t[0].onset_time, t[1], t[2].nameWithOctave) for t in
-                                       self.__get_point_part_note_triples(pattern, discard_unisons=False))
+                                       self.__get_point_part_note_triples(pattern, discard_unisons))
 
         for elem in flattened_notes:
             onset_time = round(elem.offset + global_offset, Point2d.decimal_places)

@@ -79,33 +79,36 @@ class ScoreVisualization:
         self._last_measure = -1
         self._marked_notes = []
 
-    def mark_pattern(self, pattern: Pattern2d, color='red'):
+    def mark_pattern(self, pattern: Pattern2d, color='red', discard_unisons=True):
         """
         Marks a pattern with the given color in the score.
         :param pattern: the pattern that is marked
         :param color: the color to use for the pattern
+        :param discard_unisons: set to true to avoid getting multiple notes for a point produced from a union
         """
-        for p in pattern:
-            for note in self._point_set.get_notes(p):
-                note.style.color = color
-                self._marked_notes.append(note)
+
+        for note in self._point_set.get_pattern_notes(pattern, discard_unisons=discard_unisons):
+            note.style.color = color
+            self._marked_notes.append(note)
 
         first, last = self._point_set.get_measure_range(pattern)
         self._first_measure = min(self._first_measure, first)
         self._last_measure = max(self._last_measure, last)
 
     def mark_occurrences(self, pattern_occurrences: PatternOccurrences2d, pattern_color='red',
-                         occurrence_colors=['red']):
+                         occurrence_colors=['red'], discard_unisons=True):
         """
         Mark pattern occurrences with the given colors. The colors are rotated from one occurrence to the next.
         :param pattern_occurrences: the pattern occurrences to mark
         :param pattern_color: the color used to mark the main pattern of the occurrences
         :param occurrence_colors: the colors used for marking the pattern occurrences
+        :param discard_unisons: set to true to avoid getting multiple notes for a point produced from a union
         """
-        self.mark_pattern(pattern_occurrences.pattern, pattern_color)
+        self.mark_pattern(pattern_occurrences.pattern, pattern_color, discard_unisons=discard_unisons)
 
         for i in range(len(pattern_occurrences.occurrences)):
-            self.mark_pattern(pattern_occurrences.occurrences[i], occurrence_colors[i % len(occurrence_colors)])
+            self.mark_pattern(pattern_occurrences.occurrences[i], occurrence_colors[i % len(occurrence_colors)],
+                              discard_unisons=discard_unisons)
 
     def __is_range_defined(self):
         return self._first_measure < math.inf and self._last_measure >= 0
