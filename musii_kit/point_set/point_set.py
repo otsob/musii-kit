@@ -1,5 +1,6 @@
 import uuid
 from copy import deepcopy
+from operator import itemgetter
 from typing import List
 
 import music21 as m21
@@ -100,7 +101,7 @@ class PointSet2d:
         :param quarter_length: the length of a quarter note in the time units used for measuring the onset time axis
         :param measure_line_positions: optional list or array of the positions of measure lines in time
         :param score: a music21 score object associated with this point-set
-        :param point_set_id: a dict mapping the points to music21 note objects
+        :param points_to_notes: a dict mapping the points to lists of music21 note objects
         :param pitch_extractor: the pitch extractor used when creating point-set from music21 score
         :param point_set_id: the identifier of this point-set
         :param has_expanded_repetitions: set to true to indicate that this point-set has been created from a score
@@ -243,12 +244,16 @@ class PointSet2d:
     def _read_elem_to_points(elem, measure_offset, points_and_notes, pitch_extractor):
         if PointSet2d._is_note_onset(elem):
             point = Point2d(measure_offset + elem.offset, pitch_extractor(elem.pitch))
-            points_and_notes[point] = elem
+            if point not in points_and_notes:
+                points_and_notes[point] = []
+            points_and_notes[point].append(elem)
         if isinstance(elem, m21.chord.Chord) and not isinstance(elem, m21.harmony.ChordSymbol):
             for note in elem:
                 if PointSet2d._is_note_onset(note):
                     point = Point2d(measure_offset + elem.offset, pitch_extractor(note.pitch))
-                    points_and_notes[point] = note
+                    if point not in points_and_notes:
+                        points_and_notes[point] = []
+                    points_and_notes[point].append(note)
 
     @staticmethod
     def from_numpy(points_array, piece_name=None, pitch_type=None):
@@ -322,10 +327,12 @@ class PointSet2d:
         from a score, this is None."""
         return self._score
 
-    def get_note(self, point: Point2d):
+    def get_notes(self, point: Point2d):
         """
-        Returns the note element corresponding to the given point if this point-set was
-        created from a score.
+        Returns the note elements corresponding to the given point if this point-set was
+        created from a score. Typically, there is only one note corresponding to a point, but in the case
+        of unisons occurring in polyphonic music there may be multiple notes.
+
         :param point: the point for which the corresponding note element is returned
         :return: the note element corresponding to the given point if this point-set was
         created from a score
@@ -448,7 +455,7 @@ class PointSet2d:
          :param point: the point for which to return the measure number"""
 
         if self.score:
-            note = self.get_note(point)
+            note = self.get_notes(point)[0]
             if note.measureNumber:
                 return note.measureNumber
 
@@ -484,8 +491,11 @@ class PointSet2d:
             raise ValueError('Cannot retrieve score region because score is None')
 
         pattern_start = pattern[0].onset_time
-        pattern_end = max(
-            [round(p.onset_time + self.get_note(p).quarterLength, Point2d.decimal_places) for p in pattern])
+        pattern_end = pattern_start
+
+        for point in pattern:
+            pattern_end = max(
+                round(point.onset_time + note.quarterLength, Point2d.decimal_places) for note in self.get_notes(point))
 
         return pattern_start, pattern_end
 
@@ -512,11 +522,67 @@ class PointSet2d:
 
         return i_1, i_2
 
-    def get_pattern_notation(self, pattern):
+    @staticmethod
+    def __get_part_id(note):
+
+        voice = note.sites.getObjByClass('Voice')
+        if voice:
+            measure = voice.sites.getObjByClass('Measure')
+        else:
+            measure = note.sites.getObjByClass('Measure')
+
+        part = measure.sites.getObjByClass('Part')
+        return part.id
+
+    def get_pattern_notes(self, pattern, discard_unisons=True):
+        """
+        Returns the notes in the given pattern as a list.
+
+        :param pattern: the pattern for which the notes are retrieved
+        :param discard_unisons: set to true to discard unison notes by preferring notes from a part that is more common
+        :return: the notes in the given pattern as a list
+        """
+        return [t[2] for t in self.__get_point_part_note_triples(pattern, discard_unisons)]
+
+    def __get_point_part_note_triples(self, pattern, discard_unisons):
+        triples = []
+
+        if discard_unisons:
+            part_counts = self.__part_counts(pattern)
+
+            for point in pattern:
+                notes = self.get_notes(point)
+                if len(notes) == 1:
+                    note = notes[0]
+                    triples.append((point, self.__get_part_id(note), note))
+                else:
+                    note = max(((note, part_counts[self.__get_part_id(note)]) for note in notes), key=itemgetter(1))[0]
+                    triples.append((point, self.__get_part_id(note), note))
+        else:
+            for point in pattern:
+                triples += [(point, self.__get_part_id(note), note) for note in self.get_notes(point)]
+
+        return triples
+
+    def __part_counts(self, pattern):
+        part_counts = {}
+        for point in pattern:
+            notes = self.get_notes(point)
+            for note in notes:
+                part_id = self.__get_part_id(note)
+                if part_id not in part_counts:
+                    part_counts[part_id] = 0
+
+                part_counts[part_id] += 1
+
+        return part_counts
+
+    def get_pattern_notation(self, pattern, discard_unisons=True):
         """
         Returns the music notation for the given pattern as a music21 stream.
 
         :param pattern: the pattern for which to return the notation
+        :param discard_unisons: set to true to avoid getting multiple notes for a point produced from a union
         :return: the music notation for the given point pattern
         :raise ValueError: if this point-set doesn't have a score
         """
@@ -531,19 +597,25 @@ class PointSet2d:
 
         stream = deepcopy(measures)
         flattened_notes = stream.flatten().notes.stream()
-        pattern_points = set((p for p in pattern))
+
+        # As the equality and hash for music21 notes is not usable for this purpose,
+        # use triples of onset time, part id, and notename with octave for checking membership in pattern.
+        onset_part_pitch_triples = set((t[0].onset_time, t[1], t[2].nameWithOctave) for t in
+                                       self.__get_point_part_note_triples(pattern, discard_unisons))
 
         for elem in flattened_notes:
             onset_time = round(elem.offset + global_offset, Point2d.decimal_places)
 
             if isinstance(elem, m21.note.Note):
-                if Point2d(onset_time, self.pitch_extractor(elem.pitch)) not in pattern_points:
+                if (onset_time, self.__get_part_id(elem), elem.nameWithOctave) not in onset_part_pitch_triples:
                     flattened_notes.replace(elem, m21.note.Rest(elem.duration.quarterLength), allDerived=True)
             if isinstance(elem, m21.chord.Chord) and not isinstance(elem, m21.harmony.ChordSymbol):
                 notes_to_remove = []
 
                 for note in elem:
-                    if Point2d(onset_time, self.pitch_extractor(note.pitch)) not in pattern_points:
+                    # Get the part id using the chord because notes in chords for not have the containing
+                    # measure in their sites.
+                    if (onset_time, self.__get_part_id(elem), note.nameWithOctave) not in onset_part_pitch_triples:
                         notes_to_remove.append(note)
 
                 if len(notes_to_remove) == len(elem.notes):
