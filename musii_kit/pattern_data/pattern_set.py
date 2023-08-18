@@ -120,6 +120,46 @@ class PatternSet:
             self._pat_id_to_occurrences[p.id] = patterns
             self._contents_set.add(p)
 
+    def remove_pattern(self, pattern_id):
+        """
+        Removes the pattern occurrence with the given pattern id.
+
+        Only removes a pattern that is an occurrence in a PatternOccurrences object
+
+        :param pattern_id: the id of the pattern to remove
+        """
+        po = self.get_occurrences(pattern_id)
+        po.occurrences = [p for p in po.occurrences if p.id != pattern_id]
+
+        self._contents_set.remove(self._patterns[pattern_id])
+        self._patterns.pop(pattern_id)
+        self._pat_id_to_occurrences.pop(pattern_id)
+
+    def remove_pattern_occurrences(self, pattern_id):
+        """ Removes the pattern occurrences for the pattern with given id.
+
+        :param pattern_id: the id of the PatternOccurrences object to remove.
+        """
+
+        po = self.get_occurrences(pattern_id)
+
+        item = self.get_item_by_piece_name(po.pattern.piece_name)
+        remove_index = 0
+        for i, p in enumerate(item[1]):
+            if p.pattern.id == pattern_id:
+                remove_index = i
+
+        item[1].pop(remove_index)
+
+        self._contents_set.remove(po.pattern)
+        self._patterns.pop(pattern_id)
+        self._pat_id_to_occurrences.pop(pattern_id)
+
+        for occ in po.occurrences:
+            self._contents_set.remove(occ)
+            self._patterns.pop(occ.id)
+            self._pat_id_to_occurrences.pop(occ.id)
+
     def get_item_by_piece_name(self, piece_name):
         """ Returns the item (point-set, [pattern occurrences]) for the piece with the given name. """
         return self._name_to_item[piece_name]
