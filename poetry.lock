@@ -2869,6 +2869,41 @@ socks = ["pysocks (>=1.5.6,!=1.5.7,<2.0)"]
 zstd = ["zstandard (>=0.18.0)"]
 
 [[package]]
+name = "verovio"
+version = "3.16.0"
+description = "A library and toolkit for engraving MEI music notation into SVG"
+category = "main"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "verovio-3.16.0-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:2404b11cebe9e15d166a63e374c08f23990e019e396abdbee656786a2a1eeed2"},
+    {file = "verovio-3.16.0-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:51a57a86b75862211bee2cf8355201e786372f6f937f1d1add15ff76010ad177"},
+    {file = "verovio-3.16.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:ae94e9f2acc104109a35875b441ccbd53be468f5fdd97c382a4ea65c9e31f65d"},
+    {file = "verovio-3.16.0-cp310-cp310-win32.whl", hash = "sha256:df48c1c247a84326bed75489f17dc3fc436885dca13d535692adca5143c0a3e2"},
+    {file = "verovio-3.16.0-cp310-cp310-win_amd64.whl", hash = "sha256:e9e52958860c23443ff274f201017eff6a13a13614baf4aa95b4d3b2d2d64298"},
+    {file = "verovio-3.16.0-cp311-cp311-macosx_10_9_x86_64.whl", hash = "sha256:e6876e28964abc939ee0cc599200e3d1593a866659aac03a4971c01077a54ab5"},
+    {file = "verovio-3.16.0-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:8031bf93ea434cc2c29dca35062e48fa3f02aec482b07e4271eb781711393cd1"},
+    {file = "verovio-3.16.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:d7a183c3e9f03b419c1912f1b5f2cb09b36065b752bbd924d9bbd2c1a3acaa9e"},
+    {file = "verovio-3.16.0-cp311-cp311-win32.whl", hash = "sha256:22004aeabb1d05be74ea04e14a7e0aa45ee712558d009ef28f0d27814cd8f4ba"},
+    {file = "verovio-3.16.0-cp311-cp311-win_amd64.whl", hash = "sha256:3f9b34b3605bf814428362713dad1e86b4c5cbe225c0a25dd9a525fc6aec9f3c"},
+    {file = "verovio-3.16.0-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:24d05acb95a8818dd4e74d06364e957119e619dfb070ad170ad23400355de370"},
+    {file = "verovio-3.16.0-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:357e4505b08066bbc4b189c483465faf8d612ff9aa3dc85c30a8f6bcb927d3f7"},
+    {file = "verovio-3.16.0-cp37-cp37m-win32.whl", hash = "sha256:9814dc2b45031bfad84a5dbbef7cc723d1ff0c6328e3e568e3aec247ec726ca5"},
+    {file = "verovio-3.16.0-cp37-cp37m-win_amd64.whl", hash = "sha256:b6c6f2fa0d08861549aa2f16c8322e95017c0808a1f2284e79f72292fad33930"},
+    {file = "verovio-3.16.0-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:c30f14e8220b5b62889cb991a4062041b2eb2c84eff2bbdebef91625adb54d88"},
+    {file = "verovio-3.16.0-cp38-cp38-macosx_11_0_arm64.whl", hash = "sha256:391e293bfd72a79c29db5cb68ef65daefb2c34373ba22a05e378e80d7be31b6c"},
+    {file = "verovio-3.16.0-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:f0749385590e2b0c460d32343db2239170c13282c4e8ddfc30141117d64882d8"},
+    {file = "verovio-3.16.0-cp38-cp38-win32.whl", hash = "sha256:042f97128f370bf54b09390291b6c2afad73566ebad8d4a0c839e6e32f66edfb"},
+    {file = "verovio-3.16.0-cp38-cp38-win_amd64.whl", hash = "sha256:b27cb01004591cf5b30d33744ba34d0e9b82e7032e6bf07665b6cb3ee1474410"},
+    {file = "verovio-3.16.0-cp39-cp39-macosx_10_9_x86_64.whl", hash = "sha256:2d5ee5b081386072c0c46aecd9bad9628300b6862b95cc8c280c75d0203dbfe7"},
+    {file = "verovio-3.16.0-cp39-cp39-macosx_11_0_arm64.whl", hash = "sha256:5478de056747e3426b955af1c5ca9d938fa24f36b285fc3131c32403258abac9"},
+    {file = "verovio-3.16.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:a40fbaa3525a449cb76070b92b41b086c4f76222a4ba32a577ab64401f74fe8b"},
+    {file = "verovio-3.16.0-cp39-cp39-win32.whl", hash = "sha256:96d203591f2f248687b17cdbd94213639f21e7c3e41faafc29a9b24b204d4231"},
+    {file = "verovio-3.16.0-cp39-cp39-win_amd64.whl", hash = "sha256:477111f64ebaa6de07d965c62dcc8cd3b7c385f9596187c8a3e07bb0bd71de5b"},
+    {file = "verovio-3.16.0.tar.gz", hash = "sha256:e71016b260cfb7b057afdcbf475d4c36576003a8637ca6b21787c9732fb120a8"},
+]
+
+[[package]]
 name = "wcwidth"
 version = "0.2.6"
 description = "Measures the displayed width of unicode strings in a terminal"
@@ -2940,4 +2975,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "3.10.*"
-content-hash = "b7e324f1c8f91f20259da0464497b6ea2e3d5483dc0fa82a5c8d57aafed20cd1"
+content-hash = "a1815f361852c793d6d3614e25e18c1991769b1f360deaca73dca2c3e36928d9"
