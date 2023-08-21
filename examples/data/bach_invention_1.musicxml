@@ -4,6 +4,7 @@
   <movement-title>Invention 1</movement-title>
   <identification>
     <encoding>
+      <creator type="composer">Johann Sebastian Bach</creator>
       <software>MuseScore 2.0.2</software>
       <encoding-date>2015-09-25</encoding-date>
       <supports element="accidental" type="yes"/>
