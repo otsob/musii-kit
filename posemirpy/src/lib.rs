@@ -5,14 +5,14 @@ use posemir::point_set::pattern::Pattern;
 use posemir::point_set::point::{Point, Point2DRf64};
 use posemir::point_set::set::PointSet;
 use posemir::point_set::tec::Tec;
-use posemir::search::pattern_matcher::{ExactMatcher, PatternMatcher};
-use pyo3::{pymodule, types::PyModule, PyResult, Python};
-
+use posemir::search::exact_matcher::ExactMatcher;
+use posemir::search::partial_matcher::PartialMatcher;
+use posemir::search::pattern_matcher::PatternMatcher;
+use pyo3::{pymodule, PyResult, Python, types::PyModule};
 
 /// The Python module definition
 #[pymodule]
 fn posemirpy(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
-
     fn pattern_to_array<'py>(py: Python<'py>, pattern: &Pattern<Point2DRf64>) -> &'py PyArray2<f64> {
         let arr = unsafe {
             let rows = pattern.len();
@@ -32,7 +32,7 @@ fn posemirpy(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
     }
 
     fn numpy_array_to_points(np_array: &PyReadonlyArrayDyn<f64>) -> Vec<Point2DRf64> {
-        let mut points : Vec<Point2DRf64> = Vec::new();
+        let mut points: Vec<Point2DRf64> = Vec::new();
 
         for row in np_array.as_array().rows() {
             // Use the raw point from the third column as x
@@ -47,9 +47,8 @@ fn posemirpy(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
     fn run_siatec_c<'py>(
         py: Python<'py>,
         np_points_array: PyReadonlyArrayDyn<f64>,
-        max_ioi: f64
+        max_ioi: f64,
     ) -> Vec<(&'py PyArray2<f64>, Vec<&'py PyArray2<f64>>)> {
-
         let point_set = PointSet::new(numpy_array_to_points(&np_points_array));
 
         let mut patterns: Vec<(&PyArray2<f64>, Vec<&PyArray2<f64>>)> = Vec::new();
@@ -64,7 +63,7 @@ fn posemirpy(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
             patterns.push((pat_array, translations));
         };
 
-        SiatecC{ max_ioi }.compute_tecs_to_output(&point_set, on_output);
+        SiatecC { max_ioi }.compute_tecs_to_output(&point_set, on_output);
 
         patterns
     }
@@ -75,6 +74,7 @@ fn posemirpy(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
         py: Python<'py>,
         query_points_array: PyReadonlyArrayDyn<f64>,
         np_points_array: PyReadonlyArrayDyn<f64>,
+        min_match_size: i32,
     ) -> Vec<&'py PyArray2<f64>> {
         let point_set = PointSet::new(numpy_array_to_points(&np_points_array));
         let query_points = numpy_array_to_points(&query_points_array);
@@ -84,12 +84,16 @@ fn posemirpy(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
         let mut occurrences = Vec::new();
 
         let on_output = |pat: Pattern<Point2DRf64>| occurrences.push(pattern_to_array(py, &pat));
-        let pattern_matcher = ExactMatcher {};
-        pattern_matcher.find_occurrences_with_callback(&query, &point_set, on_output);
+        if min_match_size < 0 {
+            let pattern_matcher = ExactMatcher {};
+            pattern_matcher.find_occurrences_with_callback(&query, &point_set, on_output);
+        } else {
+            let pattern_matcher = PartialMatcher { min_match_size: min_match_size as usize };
+            pattern_matcher.find_occurrences_with_callback(&query, &point_set, on_output);
+        }
 
         occurrences
     }
-
 
     Ok(())
 }
