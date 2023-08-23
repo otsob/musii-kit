@@ -35,12 +35,14 @@ class PatternSet:
         self._data = data
         self._point_sets = {}
         self._patterns = {}
-        self._contents_set = set()
+        # Use a dict of counts to model a multiset because pattern with same points can occur multiple
+        # times in a pattern set.
+        self._content_counts = {}
         self._name_to_item = {}
         self._pat_id_to_occurrences = {}
         for item in self._data:
             point_set = item[0]
-            self._contents_set.add(point_set)
+            self.__add_to_contents(point_set)
             self._point_sets[point_set.id] = point_set
             pattern_occurrences = item[1]
             for occurrences in pattern_occurrences:
@@ -48,13 +50,27 @@ class PatternSet:
                     pattern.piece_name = point_set.piece_name
                     self._patterns[pattern.id] = pattern
                     self._pat_id_to_occurrences[pattern.id] = occurrences
-                    self._contents_set.add(pattern)
+                    self.__add_to_contents(pattern)
 
             self._name_to_item[point_set.piece_name] = item
 
+    def __remove_from_contents(self, ps):
+        if ps in self._content_counts:
+            updated_count = self._content_counts[ps] - 1
+            if updated_count <= 0:
+                self._content_counts.pop(ps)
+            else:
+                self._content_counts[ps] = updated_count
+
+    def __add_to_contents(self, ps):
+        if ps in self._content_counts:
+            self._content_counts[ps] += 1
+        else:
+            self._content_counts[ps] = 1
+
     def __contains__(self, item):
         """ Returns true if this pattern set contains the given point-set or pattern """
-        return item in self._contents_set
+        return item in self._content_counts
 
     def get_occurrences(self, pattern_id) -> PatternOccurrences2d:
         """
@@ -118,7 +134,7 @@ class PatternSet:
         # Update the helper structures
         for p in patterns:
             self._pat_id_to_occurrences[p.id] = patterns
-            self._contents_set.add(p)
+            self.__add_to_contents(p)
 
     def remove_pattern(self, pattern_id):
         """
@@ -131,7 +147,7 @@ class PatternSet:
         po = self.get_occurrences(pattern_id)
         po.occurrences = [p for p in po.occurrences if p.id != pattern_id]
 
-        self._contents_set.remove(self._patterns[pattern_id])
+        self.__remove_from_contents(self._patterns[pattern_id])
         self._patterns.pop(pattern_id)
         self._pat_id_to_occurrences.pop(pattern_id)
 
@@ -151,12 +167,12 @@ class PatternSet:
 
         item[1].pop(remove_index)
 
-        self._contents_set.remove(po.pattern)
+        self.__remove_from_contents(po.pattern)
         self._patterns.pop(pattern_id)
         self._pat_id_to_occurrences.pop(pattern_id)
 
         for occ in po.occurrences:
-            self._contents_set.remove(occ)
+            self.__remove_from_contents(occ)
             self._patterns.pop(occ.id)
             self._pat_id_to_occurrences.pop(occ.id)
 
