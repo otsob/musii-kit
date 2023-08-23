@@ -58,12 +58,13 @@ class TestPatternSet:
         assert point_set.piece_name == piece_name
         patterns = pattern_set[0][1]
         assert 6 == len(patterns)
+        assert pattern in pattern_set
 
     def test_remove_single_pattern_occurrence(self):
         pattern_set_path = Path(os.path.dirname(os.path.realpath(__file__))) / 'resources/pattern_set_musicxml'
         pattern_set = PatternSet.from_path(pattern_set_path)
 
-        pattern_occ = pattern_set[0][1][0]
+        pattern_occ = pattern_set[0][1][2]
         expected_occ_count = len(pattern_occ) - 1
         pattern = pattern_occ.occurrences[0]
         pat_id = pattern.id
@@ -72,7 +73,7 @@ class TestPatternSet:
         assert len(pattern_set) == 1
         piece_name = 'test-piece'
         assert pattern_set.get_pattern_count(piece_name) == 5
-        patterns = pattern_set[0][1][0]
+        patterns = pattern_set[0][1][2]
         assert len(patterns) == expected_occ_count
 
         assert pattern not in pattern_set
@@ -87,7 +88,7 @@ class TestPatternSet:
         pattern_set_path = Path(os.path.dirname(os.path.realpath(__file__))) / 'resources/pattern_set_musicxml'
         pattern_set = PatternSet.from_path(pattern_set_path)
 
-        pattern_occ = pattern_set[0][1][0]
+        pattern_occ = pattern_set[0][1][2]
         pattern = pattern_occ.pattern
         occurrences = pattern_occ.occurrences
         pat_id = pattern.id
