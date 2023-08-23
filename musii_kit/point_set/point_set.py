@@ -531,8 +531,14 @@ class PointSet2d:
         else:
             measure = note.sites.getObjByClass('Measure')
 
-        part = measure.sites.getObjByClass('Part')
-        return part.id
+        if measure:
+            part = measure.sites.getObjByClass('Part')
+            if part:
+                return part.id
+
+        # Return None as the part id if it's not accessible through the note's sites.
+        # Sites are not always set correctly for notes.
+        return 'None'
 
     def get_pattern_notes(self, pattern, discard_unisons=True):
         """
