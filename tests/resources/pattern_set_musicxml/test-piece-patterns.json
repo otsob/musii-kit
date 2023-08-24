@@ -14,6 +14,7 @@
         ],
         "dtype": "float",
         "pitch_type": "chromatic",
+        "piece_name": "test-piece",
         "label": "P0",
         "representation": "point_set",
         "source": "SIATEC-C"
@@ -31,6 +32,7 @@
         ],
         "dtype": "float",
         "pitch_type": "chromatic",
+        "piece_name": "test-piece",
         "label": "P0",
         "representation": "point_set",
         "source": "SIATEC-C"
@@ -49,6 +51,7 @@
       ],
       "dtype": "float",
       "pitch_type": "chromatic",
+      "piece_name": "test-piece",
       "label": "P0",
       "representation": "point_set",
       "source": "SIATEC-C"
@@ -70,6 +73,7 @@
         ],
         "dtype": "float",
         "pitch_type": "chromatic",
+        "piece_name": "test-piece",
         "label": "P1",
         "representation": "point_set",
         "source": "SIATEC-C"
@@ -88,6 +92,7 @@
       ],
       "dtype": "float",
       "pitch_type": "chromatic",
+      "piece_name": "test-piece",
       "label": "P1",
       "representation": "point_set",
       "source": "SIATEC-C"
@@ -105,6 +110,7 @@
         ],
         "dtype": "float",
         "pitch_type": "chromatic",
+        "piece_name": "test-piece",
         "label": "P2",
         "representation": "point_set",
         "source": "SIATEC-C"
@@ -118,6 +124,7 @@
         ],
         "dtype": "float",
         "pitch_type": "chromatic",
+        "piece_name": "test-piece",
         "label": "P2",
         "representation": "point_set",
         "source": "SIATEC-C"
@@ -131,6 +138,7 @@
         ],
         "dtype": "float",
         "pitch_type": "chromatic",
+        "piece_name": "test-piece",
         "label": "P2",
         "representation": "point_set",
         "source": "SIATEC-C"
@@ -144,6 +152,7 @@
         ],
         "dtype": "float",
         "pitch_type": "chromatic",
+        "piece_name": "test-piece",
         "label": "P2",
         "representation": "point_set",
         "source": "SIATEC-C"
@@ -157,6 +166,7 @@
         ],
         "dtype": "float",
         "pitch_type": "chromatic",
+        "piece_name": "test-piece",
         "label": "P2",
         "representation": "point_set",
         "source": "SIATEC-C"
@@ -170,6 +180,7 @@
         ],
         "dtype": "float",
         "pitch_type": "chromatic",
+        "piece_name": "test-piece",
         "label": "P2",
         "representation": "point_set",
         "source": "SIATEC-C"
@@ -183,6 +194,7 @@
         ],
         "dtype": "float",
         "pitch_type": "chromatic",
+        "piece_name": "test-piece",
         "label": "P2",
         "representation": "point_set",
         "source": "SIATEC-C"
@@ -196,6 +208,7 @@
         ],
         "dtype": "float",
         "pitch_type": "chromatic",
+        "piece_name": "test-piece",
         "label": "P2",
         "representation": "point_set",
         "source": "SIATEC-C"
@@ -209,6 +222,7 @@
         ],
         "dtype": "float",
         "pitch_type": "chromatic",
+        "piece_name": "test-piece",
         "label": "P2",
         "representation": "point_set",
         "source": "SIATEC-C"
@@ -222,6 +236,7 @@
         ],
         "dtype": "float",
         "pitch_type": "chromatic",
+        "piece_name": "test-piece",
         "label": "P2",
         "representation": "point_set",
         "source": "SIATEC-C"
@@ -236,6 +251,7 @@
       ],
       "dtype": "float",
       "pitch_type": "chromatic",
+      "piece_name": "test-piece",
       "label": "P2",
       "representation": "point_set",
       "source": "SIATEC-C"
@@ -257,6 +273,7 @@
         ],
         "dtype": "float",
         "pitch_type": "chromatic",
+        "piece_name": "test-piece",
         "label": "P3",
         "representation": "point_set",
         "source": "SIATEC-C"
@@ -274,6 +291,7 @@
         ],
         "dtype": "float",
         "pitch_type": "chromatic",
+        "piece_name": "test-piece",
         "label": "P3",
         "representation": "point_set",
         "source": "SIATEC-C"
@@ -292,6 +310,7 @@
       ],
       "dtype": "float",
       "pitch_type": "chromatic",
+      "piece_name": "test-piece",
       "label": "P3",
       "representation": "point_set",
       "source": "SIATEC-C"
@@ -313,6 +332,7 @@
         ],
         "dtype": "float",
         "pitch_type": "chromatic",
+        "piece_name": "test-piece",
         "label": "P4",
         "representation": "point_set",
         "source": "SIATEC-C"
@@ -330,6 +350,7 @@
         ],
         "dtype": "float",
         "pitch_type": "chromatic",
+        "piece_name": "test-piece",
         "label": "P4",
         "representation": "point_set",
         "source": "SIATEC-C"
@@ -348,6 +369,7 @@
       ],
       "dtype": "float",
       "pitch_type": "chromatic",
+      "piece_name": "test-piece",
       "label": "P4",
       "representation": "point_set",
       "source": "SIATEC-C"

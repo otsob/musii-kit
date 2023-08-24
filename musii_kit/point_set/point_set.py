@@ -737,6 +737,7 @@ class Pattern2d(PointSet2d):
                 'pitch_type': self.pitch_type,
                 'dtype': self._dtype_to_str(),
                 'id': self.id,
+                'piece_name': self.piece_name,
                 'data': self._points[:, 0:2].tolist(),
                 'additional_data': self.additional_data}
 
@@ -754,6 +755,7 @@ class Pattern2d(PointSet2d):
         pitch_type = input_dict['pitch_type']
         points = list(map(lambda row: Point2d(row[0], row[1]), input_dict['data']))
         pattern_id = input_dict['id'] if 'id' in input_dict else None
+        piece_name = input_dict['piece_name'] if 'piece_name' in input_dict else None
 
         dtype = float
         if data_type == 'int':
@@ -762,7 +764,7 @@ class Pattern2d(PointSet2d):
         additional_data = input_dict['additional_data'] if 'additional_data' in input_dict else None
 
         return Pattern2d(points, label, source, dtype=dtype, pitch_type=pitch_type, pattern_id=pattern_id,
-                         additional_data=additional_data)
+                         additional_data=additional_data, piece_name=piece_name)
 
     def time_scaled(self, factor):
         """
