@@ -249,6 +249,10 @@ class PointSet2d:
             points_and_notes[point].append(elem)
         if isinstance(elem, m21.chord.Chord) and not isinstance(elem, m21.harmony.ChordSymbol):
             for note in elem:
+                # Notes within chords do not have sites set for some reason in music21
+                # This "hack" sets the sites for the notes to be the same as those of the chord,
+                # so that accessing the information through the notes is possible.
+                note.sites = elem.sites
                 if PointSet2d._is_note_onset(note):
                     point = Point2d(measure_offset + elem.offset, pitch_extractor(note.pitch))
                     if point not in points_and_notes:
