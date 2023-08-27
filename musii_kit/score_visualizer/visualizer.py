@@ -5,6 +5,7 @@ from copy import deepcopy
 import music21 as m21
 import verovio
 from IPython.display import SVG, display
+from cairosvg import svg2pdf, svg2png
 from music21.environment import UserSettingsException
 
 # The visualizer is set by modifying music21 global settings, therefore
@@ -107,7 +108,7 @@ def __clean_up_credits(notation):
     return notation
 
 
-def __visualize_with_verovio(notation, options):
+def __visualize_with_verovio(notation, options, file_path, show_notebook_output):
     with tempfile.NamedTemporaryFile(suffix='.musicxml') as tmp:
         name = tmp.name
         cleaned_up_notation = __clean_up_credits(notation)
@@ -121,16 +122,36 @@ def __visualize_with_verovio(notation, options):
         page_count = tk.getPageCount()
 
         for i in range(1, page_count + 1):
-            display(SVG(tk.renderToSVG(i)))
+            svg_string = tk.renderToSVG(i)
+
+            if file_path:
+                # Workaround to fix an issue in cairosvg https://github.com/Kozea/CairoSVG/issues/300
+                svg_string = svg_string.replace("overflow=\"inherit\"", "overflow=\"visible\"")
+                if file_path.endswith('.png'):
+                    svg2png(bytestring=svg_string, dpi=300, scale=2.0, background_color='white',
+                            write_to=f'{file_path[0:-4]}_{i}.png')
+                elif file_path.endswith('.pdf'):
+                    svg2pdf(bytestring=svg_string, write_to=f'{file_path[0:-4]}_{i}.pdf')
+                else:
+                    print('Unsupported file type for saving music notation visualization to file'
+                          '(needs to be .png .pdf)')
+
+            if show_notebook_output:
+                display(SVG(svg_string))
 
 
-def visualize(notation):
+def visualize(notation, file_path=None, show_notebook_output=True):
     """
     Visualizes the given music21 notation with the visualization backend that has been set.
     Uses verovio by default. For other visualizers they need to have been set with either
     `set_muse_score_visualizer` or `set_lilypond_visualizer`.
 
-    :param notation: a music21 notation type that supports visualization """
+    Writing to file is only supported with verovio visualizer and each page is written to a separate file.
+
+    :param notation: a music21 notation type that supports visualization
+    :param file_path: optional file path where to save the music notation as png or pdf depending on the suffix
+    :param show_notebook_output: set to true to hide the notation in the cell output. Can be used to only
+     save the visualizations to file without showing them in a notebook. """
     global VISUALIZER
     if VISUALIZER == 'musescore':
         notation.show('ipython.musicxml.png')
@@ -138,4 +159,4 @@ def visualize(notation):
         notation.show('ipython.lily.png')
     else:
         global VEROVIO_OPTIONS
-        __visualize_with_verovio(notation, VEROVIO_OPTIONS)
+        __visualize_with_verovio(notation, VEROVIO_OPTIONS, file_path, show_notebook_output)
