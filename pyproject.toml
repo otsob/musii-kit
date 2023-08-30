@@ -20,6 +20,7 @@ setuptools = "^67.6.1"
 posemirpy = { path = "./posemirpy", develop = true }
 verovio = "^3.16.0"
 cairosvg = "^2.7.1"
+pypdf = "^3.15.4"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.1.0"
