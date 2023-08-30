@@ -7,6 +7,7 @@ import verovio
 from IPython.display import SVG, display
 from cairosvg import svg2pdf, svg2png
 from music21.environment import UserSettingsException
+from pypdf import PdfMerger
 
 # The visualizer is set by modifying music21 global settings, therefore
 # this unfortunately is implemented as modification of global state.
@@ -112,36 +113,55 @@ def __clean_up_credits(notation, title):
     return notation
 
 
+def __write_pdf_file(svg_pages, file_path):
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        pdf_page_files = []
+
+        for i, svg_string in enumerate(svg_pages):
+            pdf_path = f'{tmp_dir}/{i}.pdf'
+            pdf_page_files.append(pdf_path)
+            svg2pdf(bytestring=svg_string, write_to=pdf_path)
+
+        merger = PdfMerger()
+
+        for pdf in pdf_page_files:
+            merger.append(pdf)
+
+        merger.write(file_path)
+        merger.close()
+
+
 def __visualize_with_verovio(notation, options, file_path, show_notebook_output, title):
+    tk = verovio.toolkit()
+
     with tempfile.NamedTemporaryFile(suffix='.musicxml') as tmp:
         name = tmp.name
         cleaned_up_notation = __clean_up_credits(notation, title)
-
         cleaned_up_notation.write('musicxml', fp=name)
-
-        tk = verovio.toolkit()
         tk.loadFile(name)
-        tk.setOptions(options)
-        tk.redoLayout()
-        page_count = tk.getPageCount()
 
-        for i in range(1, page_count + 1):
-            svg_string = tk.renderToSVG(i)
+    tk.setOptions(options)
+    tk.redoLayout()
 
-            if file_path:
-                # Workaround to fix an issue in cairosvg https://github.com/Kozea/CairoSVG/issues/300
+    # Workaround to fix an issue in cairosvg https://github.com/Kozea/CairoSVG/issues/300
+    svg_pages = [tk.renderToSVG(i).replace("overflow=\"inherit\"", "overflow=\"visible\"")
+                 for i in range(1, tk.getPageCount() + 1)]
+
+    if file_path and file_path.endswith('.pdf'):
+        __write_pdf_file(svg_pages, file_path)
+
+    for i, svg_string in enumerate(svg_pages):
+        if file_path:
+            if file_path.endswith('.png'):
                 svg_string = svg_string.replace("overflow=\"inherit\"", "overflow=\"visible\"")
-                if file_path.endswith('.png'):
-                    svg2png(bytestring=svg_string, dpi=300, scale=2.0, background_color='white',
-                            write_to=f'{file_path[0:-4]}_{i}.png')
-                elif file_path.endswith('.pdf'):
-                    svg2pdf(bytestring=svg_string, write_to=f'{file_path[0:-4]}_{i}.pdf')
-                else:
-                    print('Unsupported file type for saving music notation visualization to file'
-                          '(needs to be .png .pdf)')
+                svg2png(bytestring=svg_string, dpi=300, scale=2.0, background_color='white',
+                        write_to=f'{file_path[0:-4]}_{i}.png')
+            elif not file_path.endswith('.pdf'):
+                print('Unsupported file type for saving music notation visualization to file'
+                      '(needs to be .png .pdf)')
 
-            if show_notebook_output:
-                display(SVG(svg_string))
+        if show_notebook_output:
+            display(SVG(svg_string))
 
 
 def visualize(notation, file_path=None, show_notebook_output=True, title=None):
