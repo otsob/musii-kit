@@ -156,20 +156,27 @@ class TestPointSet2d:
         point_set = read_musicxml(self.test_path / 'resources/test-pattern-extraction.musicxml')
         pattern = Pattern2d([Point2d(0.0, 62.0), Point2d(2.0, 60), Point2d(4.0, 62.0)], 'A', 'manual')
         pattern_notes = point_set.get_pattern_notes(pattern, discard_unisons=False)
-        assert len(pattern_notes) == 4
+        assert len(pattern_notes) == 6
         assert pattern_notes[0].nameWithOctave == 'D4'
+        # There are two unison notes with one consisting of 3 tied notes
+        # -> a total of 4 notes of the same pitch
         assert pattern_notes[1].nameWithOctave == 'C4'
         assert pattern_notes[2].nameWithOctave == 'C4'
-        assert pattern_notes[3].nameWithOctave == 'D4'
+        assert pattern_notes[3].nameWithOctave == 'C4'
+        assert pattern_notes[4].nameWithOctave == 'C4'
+        assert pattern_notes[5].nameWithOctave == 'D4'
 
     def test_pattern_notes_without_unisons_are_correctly_returned(self):
         point_set = read_musicxml(self.test_path / 'resources/test-pattern-extraction.musicxml')
         pattern = Pattern2d([Point2d(0.0, 62.0), Point2d(2.0, 60), Point2d(4.0, 62.0)], 'A', 'manual')
         pattern_notes = point_set.get_pattern_notes(pattern, discard_unisons=True)
-        assert len(pattern_notes) == 3
+        assert len(pattern_notes) == 5
         assert pattern_notes[0].nameWithOctave == 'D4'
+        # There is one C4 onset, but it is tied to two notes, so the onset corresponds to three notes.
         assert pattern_notes[1].nameWithOctave == 'C4'
-        assert pattern_notes[2].nameWithOctave == 'D4'
+        assert pattern_notes[2].nameWithOctave == 'C4'
+        assert pattern_notes[3].nameWithOctave == 'C4'
+        assert pattern_notes[4].nameWithOctave == 'D4'
 
 
 class TestPattern2d:
