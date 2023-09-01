@@ -92,7 +92,7 @@ class PointSet2d:
 
     def __init__(self, points: List[Point2d], piece_name=None, dtype=float, quarter_length=1.0,
                  measure_line_positions=None, score=None, points_to_notes=None, pitch_extractor=None,
-                 point_set_id=None, has_expanded_repetitions=False):
+                 point_set_id=None, has_expanded_repetitions=False, tie_continuations=None):
         """
         Constructs new instance.
         :param points: the points in the point set as a numpy array
@@ -105,6 +105,9 @@ class PointSet2d:
         :param pitch_extractor: the pitch extractor used when creating point-set from music21 score
         :param point_set_id: the identifier of this point-set
         :param has_expanded_repetitions: set to true to indicate that this point-set has been created from a score
+        :param tie_continuations: a dictionary of tie continuations for the points that denote onsets that are continued
+        by tied notes. For each point this is a list of pairs (point, note) corresponding to tied notes continuing the
+        onset.
         with repetitions included.
         """
 
@@ -140,6 +143,7 @@ class PointSet2d:
             self._id = str(uuid.uuid1())
 
         self.has_expanded_repetitions = has_expanded_repetitions
+        self.__tie_continuations = tie_continuations
 
     @property
     def id(self):
@@ -181,6 +185,7 @@ class PointSet2d:
         measure_line_positions = []
         first_staff = True
         points_and_notes = {}
+        tie_continuations = {}
 
         if expand_repetitions:
             score = score.expandRepeats()
@@ -190,13 +195,17 @@ class PointSet2d:
             pickup_measure = staff.measure(0)
             measure_offset = -pickup_measure.quarterLength if pickup_measure else 0.0
 
+            unresolved_ties = {}
+
             for measure in filter(lambda m: isinstance(m, m21.stream.base.Measure), staff):
                 for elem in measure:
-                    PointSet2d._read_elem_to_points(elem, measure_offset, points_and_notes, pitch_extractor)
+                    PointSet2d._read_elem_to_points(elem, measure_offset, points_and_notes, pitch_extractor,
+                                                    unresolved_ties, tie_continuations)
 
                     if isinstance(elem, m21.stream.Voice):
                         for e in elem:
-                            PointSet2d._read_elem_to_points(e, measure_offset, points_and_notes, pitch_extractor)
+                            PointSet2d._read_elem_to_points(e, measure_offset, points_and_notes, pitch_extractor,
+                                                            unresolved_ties, tie_continuations)
 
                 if first_staff:
                     measure_line_positions.append(measure_offset)
@@ -211,7 +220,8 @@ class PointSet2d:
         return PointSet2d(points_and_notes.keys(), PointSet2d._extract_piece_name(score), dtype=float,
                           quarter_length=1.0,
                           measure_line_positions=measure_line_positions, score=score, points_to_notes=points_and_notes,
-                          pitch_extractor=pitch_extractor, has_expanded_repetitions=expand_repetitions)
+                          pitch_extractor=pitch_extractor, has_expanded_repetitions=expand_repetitions,
+                          tie_continuations=tie_continuations)
 
     @staticmethod
     def _extract_piece_name(score):
@@ -227,37 +237,61 @@ class PointSet2d:
         return piece_name
 
     @staticmethod
-    def _is_note_onset(elem):
+    def _is_note_onset(note):
         """ Returns true if the element represents a note onset (excluding grace notes). """
-        if not isinstance(elem, m21.note.Note):
+        if isinstance(note.duration, m21.duration.GraceDuration):
             return False
 
-        if isinstance(elem.duration, m21.duration.GraceDuration):
-            return False
-
-        if elem.tie:
-            return elem.tie.type != 'stop' and elem.tie.type != 'continue'
+        if note.tie:
+            return note.tie.type != 'stop' and note.tie.type != 'continue'
 
         return True
 
     @staticmethod
-    def _read_elem_to_points(elem, measure_offset, points_and_notes, pitch_extractor):
-        if PointSet2d._is_note_onset(elem):
-            point = Point2d(measure_offset + elem.offset, pitch_extractor(elem.pitch))
+    def _continues_unresolved_tie(note, unresolved_ties):
+        if isinstance(note.duration, m21.duration.GraceDuration):
+            return False
+
+        if note.nameWithOctave not in unresolved_ties:
+            return False
+
+        return note.tie and note.tie.type != 'start'
+
+    @staticmethod
+    def _add_note_to_points(note, onset_time, points_and_notes, pitch_extractor, unresolved_ties,
+                            tie_continuations):
+        point = Point2d(onset_time, pitch_extractor(note.pitch))
+
+        if PointSet2d._is_note_onset(note):
             if point not in points_and_notes:
                 points_and_notes[point] = []
-            points_and_notes[point].append(elem)
-        if isinstance(elem, m21.chord.Chord) and not isinstance(elem, m21.harmony.ChordSymbol):
-            for note in elem:
+            points_and_notes[point].append(note)
+            if note.tie and note.tie.type == 'start':
+                unresolved_ties[note.nameWithOctave] = (point, [])
+        elif PointSet2d._continues_unresolved_tie(note, unresolved_ties):
+            tie_starting_point, continuations = unresolved_ties[note.nameWithOctave]
+            continuations.append((point, note))
+            if note.tie.type == 'stop':
+                tie_continuations[tie_starting_point] = continuations
+                unresolved_ties.pop(note.nameWithOctave)
+
+    @staticmethod
+    def _read_elem_to_points(elem, measure_offset, points_and_notes, pitch_extractor, unresolved_ties,
+                             tie_continuations):
+
+        if isinstance(elem, m21.note.Note):
+            PointSet2d._add_note_to_points(elem, measure_offset + elem.offset, points_and_notes, pitch_extractor,
+                                           unresolved_ties,
+                                           tie_continuations)
+        elif isinstance(elem, m21.chord.Chord) and not isinstance(elem, m21.harmony.ChordSymbol):
+            for note in filter(lambda n: isinstance(n, m21.note.Note), elem):
                 # Notes within chords do not have sites set for some reason in music21
                 # This "hack" sets the sites for the notes to be the same as those of the chord,
                 # so that accessing the information through the notes is possible.
                 note.sites = elem.sites
-                if PointSet2d._is_note_onset(note):
-                    point = Point2d(measure_offset + elem.offset, pitch_extractor(note.pitch))
-                    if point not in points_and_notes:
-                        points_and_notes[point] = []
-                    points_and_notes[point].append(note)
+                PointSet2d._add_note_to_points(note, measure_offset + elem.offset, points_and_notes, pitch_extractor,
+                                               unresolved_ties,
+                                               tie_continuations)
 
     @staticmethod
     def from_numpy(points_array, piece_name=None, pitch_type=None):
@@ -544,6 +578,12 @@ class PointSet2d:
         # Sites are not always set correctly for notes.
         return 'None'
 
+    def __get_tie_continuations(self, point):
+        if point in self.__tie_continuations:
+            return self.__tie_continuations[point]
+
+        return []
+
     def get_pattern_notes(self, pattern, discard_unisons=True):
         """
         Returns the notes in the given pattern as a list.
@@ -564,15 +604,24 @@ class PointSet2d:
                 notes = self.get_notes(point)
                 if len(notes) == 1:
                     note = notes[0]
-                    triples.append((point, self.__get_part_id(note), note))
+                    self.__add_ppn_triples(note, self.__get_part_id(note), point, triples)
                 else:
-                    note = max(((note, part_counts[self.__get_part_id(note)]) for note in notes), key=itemgetter(1))[0]
-                    triples.append((point, self.__get_part_id(note), note))
+                    note = max(((n, part_counts[self.__get_part_id(n)]) for n in notes), key=itemgetter(1))[0]
+                    part_id = self.__get_part_id(note)
+                    self.__add_ppn_triples(note, part_id, point, triples)
         else:
             for point in pattern:
-                triples += [(point, self.__get_part_id(note), note) for note in self.get_notes(point)]
+                for note in self.get_notes(point):
+                    part_id = self.__get_part_id(note)
+                    self.__add_ppn_triples(note, part_id, point, triples)
 
         return triples
+
+    def __add_ppn_triples(self, note, part_id, point, triples):
+        triples.append((point, part_id, note))
+        for p, n in self.__get_tie_continuations(point):
+            if self.__get_part_id(n) == part_id:
+                triples.append((p, self.__get_part_id(n), n))
 
     def __part_counts(self, pattern):
         part_counts = {}
