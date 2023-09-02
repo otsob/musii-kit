@@ -512,10 +512,17 @@ class PointSet2d:
     def get_measure_range(self, pattern):
         """
         Returns the range of measures (inclusive) in the score associated with this point-set for the given pattern.
+        The range of measures covers the whole pattern duration.
         :param pattern: the pattern for which to retrieve the measure range.
         :return: a pair (first, last) of measure numbers
         """
-        return self.get_measure(pattern[0]), self.get_measure(pattern[-1])
+
+        first = self.get_measure(pattern[0])
+        last = first
+        for p in pattern:
+            last = max(n.measureNumber for n in self.get_notes(p) + self.__get_tie_continuations(p))
+
+        return first, last
 
     def get_pattern_span(self, pattern):
         """
@@ -533,7 +540,8 @@ class PointSet2d:
 
         for point in pattern:
             pattern_end = max(
-                round(point.onset_time + note.quarterLength, Point2d.decimal_places) for note in self.get_notes(point))
+                round(point.onset_time + note.quarterLength, Point2d.decimal_places)
+                for note in self.get_notes(point) + self.__get_tie_continuations(point))
 
         return pattern_start, pattern_end
 
