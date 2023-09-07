@@ -500,6 +500,9 @@ class PointSet2d:
         # Compute the measure number from the measure line positions if the score is missing
         # or for some reason the music21 note element does not have the measure number set (which
         # sometimes happens).
+        return self.__get_measure_from_lines(point)
+
+    def __get_measure_from_lines(self, point):
         for i in range(len(self.measure_line_positions) - 1):
             m_start = self.measure_line_positions[i]
             m_end = self.measure_line_positions[i + 1]
@@ -519,8 +522,15 @@ class PointSet2d:
 
         first = self.get_measure(pattern[0])
         last = first
-        for p in pattern:
-            last = max(n.measureNumber for n in self.get_notes(p) + self.__get_tied_notes(p))
+        for point in pattern:
+            measure_numbers = [self.get_measure(point)]
+            for p, n in self.__get_tie_continuations(point):
+                if n.measureNumber:
+                    measure_numbers.append(n.measureNumber)
+                else:
+                    measure_numbers.append(self.__get_measure_from_lines(p))
+
+            last = max(measure_numbers)
 
         return first, last
 
