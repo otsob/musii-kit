@@ -215,7 +215,7 @@ dependencies = [
 
 [[package]]
 name = "posemirpy"
-version = "0.4.31"
+version = "0.4.32"
 dependencies = [
  "numpy",
  "posemir",
