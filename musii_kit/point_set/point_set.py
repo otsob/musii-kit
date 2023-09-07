@@ -520,7 +520,7 @@ class PointSet2d:
         first = self.get_measure(pattern[0])
         last = first
         for p in pattern:
-            last = max(n.measureNumber for n in self.get_notes(p) + self.__get_tie_continuations(p))
+            last = max(n.measureNumber for n in self.get_notes(p) + self.__get_tied_notes(p))
 
         return first, last
 
@@ -541,7 +541,7 @@ class PointSet2d:
         for point in pattern:
             pattern_end = max(
                 round(point.onset_time + note.quarterLength, Point2d.decimal_places)
-                for note in self.get_notes(point) + self.__get_tie_continuations(point))
+                for note in self.get_notes(point) + self.__get_tied_notes(point))
 
         return pattern_start, pattern_end
 
@@ -591,6 +591,9 @@ class PointSet2d:
             return self.__tie_continuations[point]
 
         return []
+
+    def __get_tied_notes(self, point):
+        return [n for p, n in self.__get_tie_continuations(point)]
 
     def get_pattern_notes(self, pattern, discard_unisons=True):
         """
