@@ -4,7 +4,7 @@ WORKDIR /home/jupyter
 
 # Install Rust
 ENV CARGO_HOME=/home/jupyter/.cargo
-ENV RUSTUP_HOME=/home/jupyter/.cargo
+ENV RUSTUP_HOME=/home/jupyter/.rustup
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
 ENV PATH="${CARGO_HOME}/bin:${PATH}"
 
@@ -25,6 +25,8 @@ USER jupyter
 RUN poetry config installer.modern-installation false
 RUN poetry run ./install_kernel.sh --no-cache
 
+# Remove
+RUN rustup self uninstall -y
 WORKDIR /home/jupyter/examples
 
 ENTRYPOINT ["poetry", "run", "jupyter", "notebook"]
