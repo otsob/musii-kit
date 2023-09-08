@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "musii-kit"
-version = "0.5.0"
+version = "0.5.1"
 description = "Collection of tools for computational musicology"
 authors = ["Otso Björklund <otso.bjorklund@gmail.com>"]
 license = "MIT"
