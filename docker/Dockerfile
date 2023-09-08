@@ -2,10 +2,6 @@ FROM python:3.10.8
 
 WORKDIR /home/jupyter
 
-# Install MuseScore for visualizations
-RUN apt-get update && apt-get install musescore -y
-ENV MUSE_SCORE_PATH=/usr/bin/mscore
-
 # Install Rust
 ENV CARGO_HOME=/home/jupyter/.cargo
 ENV RUSTUP_HOME=/home/jupyter/.cargo
@@ -15,7 +11,6 @@ ENV PATH="${CARGO_HOME}/bin:${PATH}"
 # Install poetry
 RUN pip install 'poetry==1.4.2'
 
-COPY posemirpy posemirpy
 COPY musii_kit musii_kit
 COPY README.md README.md
 COPY pyproject.toml pyproject.toml
