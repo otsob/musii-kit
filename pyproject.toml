@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "musii-kit"
-version = "0.4.33"
+version = "0.5.0"
 description = "Collection of tools for computational musicology"
 authors = ["Otso Björklund <otso.bjorklund@gmail.com>"]
 license = "MIT"
@@ -17,7 +17,7 @@ matplotlib = "^3.5.0"
 scipy = "^1.11.0"
 ipympl = "^0.9.2"
 setuptools = "^67.6.1"
-posemirpy = { path = "./posemirpy", develop = true }
+posemirpy = { git = "https://github.com/otsob/posemir.git", subdirectory = "posemirpy" }
 verovio = "^3.16.0"
 cairosvg = "^2.7.1"
 pypdf = "^3.15.4"
