@@ -9,17 +9,10 @@ from musii_kit.point_set.point_set import PatternOccurrences2d, PointSet2d, Patt
 
 
 class JkuPdd(PatternSet):
-    """ JKU-PDD as a PyTorch compatible data set.
+    """ JKU-PDD as a PatternSet.
 
     In order to use this class, you need to download JKU-PDD and extract it to some path.
     The path is given as an argument when creating an instance of JkuPdd.
-
-    The data is stored as triples:
-    0: The composition name as defined in JKU-PDD directory structure combined with _polyphonic or _monophonic
-    1: A 2-dimensional point set of the composition (onset, chromatic pitch)
-    2: List of PatternOccurrences of all patterns annotated for the composition
-
-    The sectionalRepetitions data is omitted from this data set.
     """
 
     def __init__(self, path, corpus=['polyphonic', 'monophonic'], pitch_type='chromatic'):
