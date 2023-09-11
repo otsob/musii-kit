@@ -172,13 +172,15 @@ class PointSet2d:
         return oct + step + shift
 
     @staticmethod
-    def from_score(score: m21.stream.Score, pitch_extractor=chromatic_pitch, expand_repetitions=False):
+    def from_score(score: m21.stream.Score, pitch_extractor=chromatic_pitch, expand_repetitions=False,
+                   include_grace_notes=False):
         """
         Returns a point-set created from the given music21 score.
 
         :param score: a music21 score
         :param pitch_extractor: the function used to map a music21 pitch to a number
         :param expand_repetitions: repeat the sections marked with repeats in the score in the returned point-set
+        :param include_grace_notes: set to true to include grace notes in the point-set, by default they are ignored
         :return: a point-set created from the given score
         """
 
@@ -200,12 +202,12 @@ class PointSet2d:
             for measure in filter(lambda m: isinstance(m, m21.stream.base.Measure), staff):
                 for elem in measure:
                     PointSet2d._read_elem_to_points(elem, measure_offset, points_and_notes, pitch_extractor,
-                                                    unresolved_ties, tie_continuations)
+                                                    unresolved_ties, tie_continuations, include_grace_notes)
 
                     if isinstance(elem, m21.stream.Voice):
                         for e in elem:
                             PointSet2d._read_elem_to_points(e, measure_offset, points_and_notes, pitch_extractor,
-                                                            unresolved_ties, tie_continuations)
+                                                            unresolved_ties, tie_continuations, include_grace_notes)
 
                 if first_staff:
                     measure_line_positions.append(measure_offset)
@@ -237,9 +239,9 @@ class PointSet2d:
         return piece_name
 
     @staticmethod
-    def _is_note_onset(note):
+    def _is_note_onset(note, include_grace_notes):
         """ Returns true if the element represents a note onset (excluding grace notes). """
-        if isinstance(note.duration, m21.duration.GraceDuration):
+        if not include_grace_notes and isinstance(note.duration, m21.duration.GraceDuration):
             return False
 
         if note.tie:
@@ -259,10 +261,10 @@ class PointSet2d:
 
     @staticmethod
     def _add_note_to_points(note, onset_time, points_and_notes, pitch_extractor, unresolved_ties,
-                            tie_continuations):
+                            tie_continuations, include_grace_notes):
         point = Point2d(onset_time, pitch_extractor(note.pitch))
 
-        if PointSet2d._is_note_onset(note):
+        if PointSet2d._is_note_onset(note, include_grace_notes):
             if point not in points_and_notes:
                 points_and_notes[point] = []
             points_and_notes[point].append(note)
@@ -277,12 +279,12 @@ class PointSet2d:
 
     @staticmethod
     def _read_elem_to_points(elem, measure_offset, points_and_notes, pitch_extractor, unresolved_ties,
-                             tie_continuations):
+                             tie_continuations, include_grace_notes):
 
         if isinstance(elem, m21.note.Note):
             PointSet2d._add_note_to_points(elem, measure_offset + elem.offset, points_and_notes, pitch_extractor,
                                            unresolved_ties,
-                                           tie_continuations)
+                                           tie_continuations, include_grace_notes)
         elif isinstance(elem, m21.chord.Chord) and not isinstance(elem, m21.harmony.ChordSymbol):
             for note in filter(lambda n: isinstance(n, m21.note.Note), elem):
                 # Notes within chords do not have sites set for some reason in music21
@@ -291,7 +293,7 @@ class PointSet2d:
                 note.sites = elem.sites
                 PointSet2d._add_note_to_points(note, measure_offset + elem.offset, points_and_notes, pitch_extractor,
                                                unresolved_ties,
-                                               tie_continuations)
+                                               tie_continuations, include_grace_notes)
 
     @staticmethod
     def from_numpy(points_array, piece_name=None, pitch_type=None):
