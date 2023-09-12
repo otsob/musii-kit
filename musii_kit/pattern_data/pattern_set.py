@@ -188,7 +188,8 @@ class PatternSet:
         raise ValueError(f'No piece with point-set-id {ps_id}')
 
     @staticmethod
-    def from_path(path, pitch_extractor=PointSet2d.chromatic_pitch, expand_repetitions=False):
+    def from_path(path, pitch_extractor=PointSet2d.chromatic_pitch, expand_repetitions=False,
+                  include_grace_notes=False):
         """
         Creates a new pattern dataset from the files in the directory at the given path.
         All JSON files are considered to contain pattern occurrences and all CSV and MusicXml (.musicxml/.mxl)
@@ -199,15 +200,16 @@ class PatternSet:
         :param path: the path from which the pattern JSON and score/pointset files are read
         :param pitch_extractor: the pitch extractor to use when reading point-sets from MusicXML
         :param expand_repetitions: set to true to expand repetitions in scores when creating the point-sets
+        :param include_grace_notes: set to true to include grace notes in point-sets converted from MusicXML
         """
-        return PatternSet(PatternSet.__collect_data(path, pitch_extractor, expand_repetitions))
+        return PatternSet(PatternSet.__collect_data(path, pitch_extractor, expand_repetitions, include_grace_notes))
 
     @staticmethod
-    def __collect_data(path, pitch_extractor, expand_repetitions):
+    def __collect_data(path, pitch_extractor, expand_repetitions, include_grace_notes):
         data = []
 
         compositions, patterns = PatternSet.__collect_compositions_and_patterns(path, pitch_extractor,
-                                                                                expand_repetitions)
+                                                                                expand_repetitions, include_grace_notes)
         for composition in compositions:
             if composition in patterns:
                 data.append((compositions[composition], patterns[composition]))
@@ -217,7 +219,7 @@ class PatternSet:
         return data
 
     @staticmethod
-    def __collect_compositions_and_patterns(path, pitch_extractor, expand_repetitions):
+    def __collect_compositions_and_patterns(path, pitch_extractor, expand_repetitions, include_grace_notes):
         compositions = {}
         patterns = {}
 
@@ -228,7 +230,8 @@ class PatternSet:
                     piece = file[0:-4]
                     compositions[piece] = PointSet2d.from_numpy(df.to_numpy()[:, 0:2], piece_name=piece)
                 if file.endswith('.musicxml') or file.endswith('.mxl'):
-                    point_set = read_musicxml(os.path.join(root, file), pitch_extractor, expand_repetitions)
+                    point_set = read_musicxml(os.path.join(root, file), pitch_extractor, expand_repetitions,
+                                              include_grace_notes)
                     piece = point_set.piece_name
                     compositions[piece] = point_set
                 if file.endswith('.json'):

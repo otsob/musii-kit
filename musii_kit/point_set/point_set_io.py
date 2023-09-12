@@ -80,13 +80,15 @@ def read_csv(path, onset_column=0, pitch_column=1, skip_header=0, delimiter=',')
     return PointSet2d.from_numpy(np.column_stack((array[:, onset_column], array[:, pitch_column])))
 
 
-def read_musicxml(path, pitch_extractor=PointSet2d.chromatic_pitch, expand_repetitions=False) -> PointSet2d:
+def read_musicxml(path, pitch_extractor=PointSet2d.chromatic_pitch, expand_repetitions=False,
+                  include_grace_notes=False) -> PointSet2d:
     """
     Reads a point set from a MusicXML file.
 
     :param path: path to MusicXML file
     :param pitch_extractor: the function used to map a music21 pitch to a number
     :param expand_repetitions: flag that sets whether repeated sections in the score are repeated in the point-set
+    :param include_grace_notes: set to true to include grace notes in the point-set, by default they are ignored
     :return: a point set with the contents of the MusicXML file
     """
-    return PointSet2d.from_score(m21.converter.parse(path), pitch_extractor, expand_repetitions)
+    return PointSet2d.from_score(m21.converter.parse(path), pitch_extractor, expand_repetitions, include_grace_notes)
