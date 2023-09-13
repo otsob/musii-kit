@@ -505,12 +505,18 @@ class PointSet2d:
         return self.__get_measure_from_lines(point)
 
     def __get_measure_from_lines(self, point):
+
+        has_pickup_measure = self.measure_line_positions[0] < 0.0
+
         for i in range(len(self.measure_line_positions) - 1):
             m_start = self.measure_line_positions[i]
             m_end = self.measure_line_positions[i + 1]
 
             if m_start <= point.onset_time < m_end:
-                return i
+                if has_pickup_measure:
+                    return i
+
+                return i + 1
 
         raise ValueError('No score or measure line positions, cannot return measure of point')
 
