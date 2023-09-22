@@ -9,7 +9,7 @@ repository = "https://github.com/otsob/musii-kit"
 
 [tool.poetry.dependencies]
 python = "3.10.*"
-numpy = "^1.25.0"
+numpy = "^1.24.0"
 pandas = "^2.0"
 jupyter = "^1.0.0"
 music21 = "^9.0"
