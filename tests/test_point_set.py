@@ -178,6 +178,14 @@ class TestPointSet2d:
         assert pattern_notes[3].nameWithOctave == 'C4'
         assert pattern_notes[4].nameWithOctave == 'D4'
 
+    def test_given_pattern_score_region_with_tolerance_is_correctly_retrieved(self):
+        point_set = read_musicxml(self.test_path / 'resources/test-point-set.musicxml')
+        pattern = Pattern2d([Point2d(2.0, 60),
+                             Point2d(2.0, 62.0)], label='A', source='Manual query')
+
+        region = point_set.get_score_region(pattern, boundaries='exclude', tolerance=1.0)
+        assert len(region.flatten().notes) == 6
+
 
 class TestPattern2d:
     test_points = [Point2d(1.0000001, 20.0), Point2d(1.0, 20.0), Point2d(0.0, 21.0)]

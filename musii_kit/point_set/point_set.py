@@ -502,9 +502,9 @@ class PointSet2d:
         # Compute the measure number from the measure line positions if the score is missing
         # or for some reason the music21 note element does not have the measure number set (which
         # sometimes happens).
-        return self.__get_measure_from_lines(point)
+        return self.__get_measure_from_lines(point.onset_time)
 
-    def __get_measure_from_lines(self, point):
+    def __get_measure_from_lines(self, point_onset):
 
         has_pickup_measure = self.measure_line_positions[0] < 0.0
 
@@ -512,7 +512,7 @@ class PointSet2d:
             m_start = self.measure_line_positions[i]
             m_end = self.measure_line_positions[i + 1]
 
-            if m_start <= point.onset_time < m_end:
+            if m_start <= point_onset < m_end:
                 if has_pickup_measure:
                     return i
 
@@ -536,7 +536,7 @@ class PointSet2d:
                 if n.measureNumber:
                     measure_numbers.append(n.measureNumber)
                 else:
-                    measure_numbers.append(self.__get_measure_from_lines(p))
+                    measure_numbers.append(self.__get_measure_from_lines(p.onset_time))
 
             last = max(measure_numbers)
 
@@ -714,7 +714,7 @@ class PointSet2d:
 
         return stream
 
-    def get_score_region(self, pattern, boundaries='exclude'):
+    def get_score_region(self, pattern, boundaries='exclude', tolerance=0.0):
         """
         Returns the region (timespan) of the score where the pattern occurs as a music21 stream.
 
@@ -722,19 +722,24 @@ class PointSet2d:
         :param boundaries: defines how notes that cross the boundaries of the timespan are handled. 'exclude'
         excludes them, 'include' includes them unaffected, and 'truncate' truncates the notes so that only the
         part of the note that fits into the timespan is included.
+        :param tolerance: tolerance (in the unit of time used in the point-set) that is added to the
+        region of the pattern
         :return: the region (time-span) of the score where the pattern occurs
         :raise ValueError: if this point-set doesn't have a score
         """
         if not self.score:
             raise ValueError('Cannot retrieve score region because score is None')
 
-        first_measure, last_measure = self.get_measure_range(pattern)
+        pattern_start, pattern_end = self.get_pattern_span(pattern)
+        region_start = max(pattern_start - tolerance, self.measure_line_positions[0])
+        region_end = min(pattern_end + tolerance, self.measure_line_positions[-1])
+
+        first_measure = self.__get_measure_from_lines(region_start)
+        last_measure = self.__get_measure_from_lines(region_end)
         measures = self.score.measures(first_measure, last_measure)
         first_in_selection = measures.flatten().notes.first()
 
         global_offset = self.__compute_global_offset(first_in_selection)
-
-        pattern_start, pattern_end = self.get_pattern_span(pattern)
 
         stream = deepcopy(measures)
         flattened_notes = stream.flatten().notes.stream()
@@ -743,7 +748,7 @@ class PointSet2d:
             onset_time = round(note.offset + global_offset, Point2d.decimal_places)
             end_time = round(onset_time + note.quarterLength, Point2d.decimal_places)
 
-            intersection = self.__intersect(pattern_start, pattern_end, onset_time, end_time)
+            intersection = self.__intersect(region_start, region_end, onset_time, end_time)
             replace_with_rest = False
 
             if not intersection:
@@ -753,7 +758,7 @@ class PointSet2d:
                 if onset_time < intersection[0]:
                     if boundaries == 'truncate':
                         # TODO: add rest before the truncated note
-                        time_reduction = pattern_start - onset_time
+                        time_reduction = region_start - onset_time
                         note.offset += time_reduction
                         note.duration.quarterLength -= time_reduction
                     if boundaries == 'exclude':
@@ -762,7 +767,7 @@ class PointSet2d:
                 if intersection[1] < end_time:
                     if boundaries == 'truncate':
                         # TODO: add rest after the truncated note
-                        note.duration.quarterLength -= end_time - pattern_end
+                        note.duration.quarterLength -= end_time - region_end
                     if boundaries == 'exclude':
                         replace_with_rest = True
 
