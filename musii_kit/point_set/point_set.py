@@ -92,7 +92,7 @@ class PointSet2d:
 
     def __init__(self, points: List[Point2d], piece_name=None, dtype=float, quarter_length=1.0,
                  measure_line_positions=None, score=None, points_to_notes=None, pitch_extractor=None,
-                 point_set_id=None, has_expanded_repetitions=False, tie_continuations=None):
+                 point_set_id=None, has_expanded_repetitions=False, tie_continuations=None, time_signatures=None):
         """
         Constructs new instance.
         :param points: the points in the point set as a numpy array
@@ -108,6 +108,8 @@ class PointSet2d:
         :param tie_continuations: a dictionary of tie continuations for the points that denote onsets that are continued
         by tied notes. For each point this is a list of pairs (point, note) corresponding to tied notes continuing the
         onset.
+        :param time_signatures: time signatures of measures as dictionary. music21 scores don't contain these apart from the measures
+        where they are visible.
         with repetitions included.
         """
 
@@ -144,6 +146,7 @@ class PointSet2d:
 
         self.has_expanded_repetitions = has_expanded_repetitions
         self.__tie_continuations = tie_continuations
+        self.time_signatures = time_signatures
 
     @property
     def id(self):
@@ -188,6 +191,8 @@ class PointSet2d:
         first_staff = True
         points_and_notes = {}
         tie_continuations = {}
+        time_signatures = {}
+        current_time_sig = None
 
         if expand_repetitions:
             score = score.expandRepeats()
@@ -196,7 +201,6 @@ class PointSet2d:
 
             pickup_measure = staff.measure(0)
             measure_offset = -pickup_measure.quarterLength if pickup_measure else 0.0
-
             unresolved_ties = {}
 
             for measure in filter(lambda m: isinstance(m, m21.stream.base.Measure), staff):
@@ -211,6 +215,10 @@ class PointSet2d:
 
                 if first_staff:
                     measure_line_positions.append(measure_offset)
+                    if measure.timeSignature:
+                        current_time_sig = measure.timeSignature
+
+                    time_signatures[measure.measureNumber] = current_time_sig
 
                 measure_offset += measure.quarterLength
 
@@ -223,7 +231,7 @@ class PointSet2d:
                           quarter_length=1.0,
                           measure_line_positions=measure_line_positions, score=score, points_to_notes=points_and_notes,
                           pitch_extractor=pitch_extractor, has_expanded_repetitions=expand_repetitions,
-                          tie_continuations=tie_continuations)
+                          tie_continuations=tie_continuations, time_signatures=time_signatures)
 
     @staticmethod
     def _extract_piece_name(score):
