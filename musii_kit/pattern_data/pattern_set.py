@@ -216,6 +216,10 @@ class PatternSet:
             else:
                 print(f'No patterns for composition {composition} found! Excluded the composition.')
 
+        for composition in patterns:
+            if composition not in compositions:
+                print(f'Patterns for {composition} exist, but piece is missing')
+
         return data
 
     @staticmethod
