@@ -72,6 +72,22 @@ class PatternSet:
         """ Returns true if this pattern set contains the given point-set or pattern """
         return item in self._content_counts
 
+    def remove_item(self, piece_name):
+        """ Removes the item for the piece with the given piece_name """
+        index = 0
+        for i, item in enumerate(self._data):
+            if item[0].piece_name == piece_name:
+                index = i
+                break
+
+        item = self[index]
+        self.__remove_from_contents(item[0])
+
+        for p_id in (po.pattern.id for po in item[1]):
+            self.remove_pattern_occurrences(p_id)
+
+        self._data.pop(index)
+
     def get_occurrences(self, pattern_id) -> PatternOccurrences2d:
         """
         Returns the pattern occurrences object containing the pattern with the given id.
@@ -168,13 +184,18 @@ class PatternSet:
         item[1].pop(remove_index)
 
         self.__remove_from_contents(po.pattern)
-        self._patterns.pop(pattern_id)
-        self._pat_id_to_occurrences.pop(pattern_id)
+        self.__clear_pattern_id(pattern_id)
 
         for occ in po.occurrences:
             self.__remove_from_contents(occ)
-            self._patterns.pop(occ.id)
-            self._pat_id_to_occurrences.pop(occ.id)
+            self.__clear_pattern_id(occ.id)
+
+    def __clear_pattern_id(self, p_id):
+        if p_id in self._patterns:
+            self._patterns.pop(p_id)
+
+        if p_id in self._pat_id_to_occurrences:
+            self._pat_id_to_occurrences.pop(p_id)
 
     def get_item_by_piece_name(self, piece_name):
         """ Returns the item (point-set, [pattern occurrences]) for the piece with the given name. """
