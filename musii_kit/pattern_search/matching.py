@@ -28,6 +28,6 @@ def find_occurrences(query: Pattern2d, point_set: PointSet2d, min_match_size: in
     raw_output = posemirpy.find_occurrences(query.as_numpy(), point_set.as_numpy(), min_match_size)
     occurrences = []
     for array in raw_output:
-        occurrences.append(Pattern2d.from_numpy(array, label="", source='GeometricMathing'))
+        occurrences.append(Pattern2d.from_numpy(array, label="", source='GeometricMatching'))
 
     return PatternOccurrences2d(point_set.piece_name, query, occurrences)
