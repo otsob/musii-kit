@@ -105,12 +105,12 @@ class PointSet2d:
         :param pitch_extractor: the pitch extractor used when creating point-set from music21 score
         :param point_set_id: the identifier of this point-set
         :param has_expanded_repetitions: set to true to indicate that this point-set has been created from a score
-        :param tie_continuations: a dictionary of tie continuations for the points that denote onsets that are continued
-        by tied notes. For each point this is a list of pairs (point, note) corresponding to tied notes continuing the
-        onset.
-        :param time_signatures: time signatures of measures as dictionary. music21 scores don't contain these apart from the measures
-        where they are visible.
-        with repetitions included.
+        with the repeats expanded.
+        :param tie_continuations: a dictionary of tie continuations for the points that denote onsets that are
+        continued by tied notes. For each point this is a list of pairs (point, note) corresponding to tied
+        notes continuing the onset.
+        :param time_signatures: time signatures of measures as dictionary. music21 scores don't contain these apart
+        from the measures where they are visible.
         """
 
         self.piece_name = piece_name
