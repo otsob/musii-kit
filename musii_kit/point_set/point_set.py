@@ -305,14 +305,19 @@ class PointSet2d:
 
     @staticmethod
     def from_numpy(points_array, piece_name=None, pitch_type=None):
-        points = []
-        for i in range(len(points_array)):
-            row = points_array[i, :]
-            points.append(Point2d(row[0], row[1]))
+        points = PointSet2d.__array_to_point_list(points_array)
 
         point_set = PointSet2d(points, piece_name, dtype=points_array.dtype)
         point_set._pitch_type = pitch_type
         return point_set
+
+    @staticmethod
+    def __array_to_point_list(points_array):
+        points = []
+        for i in range(len(points_array)):
+            row = points_array[i, :]
+            points.append(Point2d(row[0], row[1]))
+        return points
 
     @staticmethod
     def from_dict(input_dict):
@@ -497,7 +502,7 @@ class PointSet2d:
         # Append all the rest of the points from self that are left
         included_points += [self[p] for p in range(i, len(self))]
 
-        return PointSet2d(included_points, self.piece_name, self._dtype)
+        return self.__deep_copy_other_fields(included_points)
 
     def get_range(self, start, end) -> List[Point2d]:
         """
@@ -516,6 +521,24 @@ class PointSet2d:
 
         return points
 
+    def __deep_copy_other_fields(self, points):
+        copied = PointSet2d(points,
+                            piece_name=self.piece_name,
+                            dtype=self.dtype,
+                            quarter_length=self.quarter_length,
+                            measure_line_positions=deepcopy(self.measure_line_positions),
+                            score=deepcopy(self.score),
+                            points_to_notes=deepcopy(self._point_to_notes),
+                            pitch_extractor=self.pitch_extractor,
+                            # Generate new id
+                            point_set_id=None,
+                            has_expanded_repetitions=self.has_expanded_repetitions,
+                            tie_continuations=deepcopy(self.__tie_continuations),
+                            time_signatures=deepcopy(self.time_signatures))
+        copied._pitch_type = self._pitch_type
+
+        return copied
+
     def time_scaled(self, factor):
         """
         Returns a time-scaled copy of this point-set. The onset times are multiplied by the given factor.
@@ -528,15 +551,7 @@ class PointSet2d:
         scaled_point_array[:, 0] = self._points[:, 2] * factor
         scaled_point_array[:, 1] = self._points[:, 1]
 
-        scaled = PointSet2d.from_numpy(scaled_point_array, self.piece_name)
-        scaled.quarter_length = self.quarter_length
-        scaled.measure_line_positions = self.measure_line_positions
-        scaled._score = self.score
-        scaled._point_to_notes = self._point_to_notes
-        scaled._pitch_extractor = self._pitch_extractor
-        scaled._pitch_type = self._pitch_type
-
-        return scaled
+        return self.__deep_copy_other_fields(self.__array_to_point_list(scaled_point_array))
 
     def get_measure(self, point):
         """ Returns the number of the measure in which the point is located.
