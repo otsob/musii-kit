@@ -10,7 +10,10 @@ from musii_kit.point_set.point_set_io import read_musicxml, read_csv, write_poin
 
 class TestPointSet2d:
     test_path = Path(os.path.dirname(os.path.realpath(__file__)))
-    test_points = [Point2d(1.0000001, 20.0), Point2d(1.0, 20.0), Point2d(0.0, 21.0), Point2d(2.0, 20.0),
+    test_points = [Point2d(1.0000001, 20.0),
+                   Point2d(1.0, 20.0),
+                   Point2d(0.0, 21.0),
+                   Point2d(2.0, 20.0),
                    Point2d(2.0, 21.0)]
 
     def test_given_float_points_then_correct_point_set_is_created(self):
@@ -185,6 +188,45 @@ class TestPointSet2d:
 
         region = point_set.get_score_region(pattern, boundaries='exclude', tolerance=1.0)
         assert len(region.flatten().notes) == 6
+
+    def test_given_points_in_point_set_contains_is_true(self):
+        point_set = PointSet2d(self.test_points, piece_name='Test piece', dtype=float)
+        for point in self.test_points:
+            assert point in point_set
+
+    def test_given_points_not_in_point_set_contains_is_false(self):
+        point_set = PointSet2d(self.test_points, piece_name='Test piece', dtype=float)
+        assert Point2d(1.2, 20.0) not in point_set
+        assert Point2d(1.0, 19.0) not in point_set
+
+    def test_given_equal_point_sets_difference_is_empty(self):
+        ps_a = PointSet2d(self.test_points, piece_name='Test piece', dtype=float)
+        ps_b = PointSet2d(self.test_points, piece_name='Test piece', dtype=float)
+
+        assert len(ps_a - ps_b) == 0
+        assert len(ps_b - ps_a) == 0
+
+    def test_given_point_sets_with_no_common_points_difference_has_no_effect(self):
+        ps_a = PointSet2d(self.test_points, piece_name='Test piece', dtype=float)
+        ps_b = PointSet2d([Point2d(1.0, 21.0),
+                           Point2d(0.5, 21.0),
+                           Point2d(2.0, 24.0),
+                           Point2d(2.0, 11.0)], piece_name='Test piece', dtype=float)
+
+        assert (ps_a - ps_b) == ps_a
+        assert (ps_b - ps_a) == ps_b
+
+    def test_given_point_sets_with_some_common_points_difference_is_correct(self):
+        ps_a = PointSet2d(self.test_points, piece_name='Test piece', dtype=float)
+        ps_b = PointSet2d([Point2d(0.0, 21.0),
+                           Point2d(2.0, 20.0),
+                           Point2d(2.0, 21.0),
+                           Point2d(2.5, 21.0)], piece_name='Test piece', dtype=float)
+
+        expected = PointSet2d([Point2d(1.0, 20.0)],
+                              piece_name='Difference', dtype=float)
+
+        assert (ps_a - ps_b) == expected
 
 
 class TestPattern2d:
