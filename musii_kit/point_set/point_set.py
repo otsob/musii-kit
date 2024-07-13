@@ -460,6 +460,45 @@ class PointSet2d:
     def __contains__(self, point: Point2d):
         return any((self._points[:, 0:2] == np.array([point.onset_time, point.pitch_number])).all(1))
 
+    def __repr__(self):
+
+        num_of_points_to_show = 10
+        points_string = (','.join([str(p) for p in self][:num_of_points_to_show])
+                         + (' ...' if len(self) > num_of_points_to_show else ''))
+
+        return (f'PointSet2d[len={len(self)}, {points_string}], piece={self.piece_name},'
+                f'dtype={self.dtype}, pitch_type={self.pitch_type}')
+
+    def __sub__(self, other):
+        """
+        Returns a new set that is the set difference between this and other, i.e.,
+        a set that has all points included in this that are not included in other.
+        :param other: the set of points to remove from this
+        :return: a new set that is the set difference between this and other
+        """
+        i = 0
+        j = 0
+
+        included_points = []
+
+        while i < len(self) and j < len(other):
+            this = self[i]
+            that = other[j]
+
+            if this == that:
+                i += 1
+                j += 1
+            elif this < that:
+                i += 1
+                included_points.append(this)
+            else:
+                j += 1
+
+        # Append all the rest of the points from self that are left
+        included_points += [self[p] for p in range(i, len(self))]
+
+        return PointSet2d(included_points, self.piece_name, self._dtype)
+
     def get_range(self, start, end) -> List[Point2d]:
         """
         Returns the points in the given time-range (inclusive) in ascending lexicographic order.
