@@ -186,6 +186,16 @@ class TestPointSet2d:
         region = point_set.get_score_region(pattern, boundaries='exclude', tolerance=1.0)
         assert len(region.flatten().notes) == 6
 
+    def test_given_points_in_point_set_contains_is_true(self):
+        point_set = PointSet2d(self.test_points, piece_name='Test piece', dtype=float)
+        for point in self.test_points:
+            assert point in point_set
+
+    def test_given_points_not_in_point_set_contains_is_false(self):
+        point_set = PointSet2d(self.test_points, piece_name='Test piece', dtype=float)
+        assert Point2d(1.2, 20.0) not in point_set
+        assert Point2d(1.0, 19.0) not in point_set
+
 
 class TestPattern2d:
     test_points = [Point2d(1.0000001, 20.0), Point2d(1.0, 20.0), Point2d(0.0, 21.0)]

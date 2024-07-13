@@ -457,6 +457,9 @@ class PointSet2d:
         all_points = [p for p in self] + [p for p in other]
         return PointSet2d(all_points, self.piece_name, self._dtype)
 
+    def __contains__(self, point: Point2d):
+        return any((self._points[:, 0:2] == np.array([point.onset_time, point.pitch_number])).all(1))
+
     def get_range(self, start, end) -> List[Point2d]:
         """
         Returns the points in the given time-range (inclusive) in ascending lexicographic order.
