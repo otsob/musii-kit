@@ -5,3 +5,4 @@ target
 dist
 .pytest_cache
 *.profraw
+/.virtual_documents/
