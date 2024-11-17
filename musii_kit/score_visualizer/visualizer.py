@@ -67,7 +67,8 @@ def default_verovio_options():
             'adjustPageWidth': False,
             'header': 'auto',
             'footer': 'none',
-            'condense': 'encoded'}
+            'condense': 'encoded',
+            'svgCss': 'svg { background: white; }'}
 
 
 VEROVIO_OPTIONS = default_verovio_options()
