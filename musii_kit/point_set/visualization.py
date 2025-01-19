@@ -24,7 +24,7 @@ class Plot:
         self._point_set = point_set
         self.point_colors = 'k'
         self.point_size = 1.0
-        self.measure_lines = []
+        self.measure_lines = point_set.measure_line_positions if point_set.measure_line_positions else []
         self._patterns = []
 
     def add_pattern(self, pattern: Pattern2d, color='b'):
