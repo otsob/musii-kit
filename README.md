@@ -9,14 +9,11 @@ greatly inspired by the example notebooks associated with the excellent book
 
 ## Dependencies
 
-* Python 3.10
-* Jupyter Notebook
+* Python (tested with 3.11)
+* Jupyter
 * Poetry
-* MuseScore (version 3.6 recommended) or Lilypond for visualizing scores
 * Rust (for `posemirpy`)
 * [Bump2version](https://pypi.org/project/bump2version/) for version bumping
-
-The exact packages used by musii-kit are defined in the [poetry.lock](./poetry.lock) file.
 
 ## Installation
 
