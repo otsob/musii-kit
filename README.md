@@ -9,7 +9,7 @@ greatly inspired by the example notebooks associated with the excellent book
 
 ## Dependencies
 
-* Python (tested with 3.11)
+* Python (tested with 3.12)
 * Jupyter
 * Poetry
 * Rust (for `posemirpy`)

@@ -1,4 +1,4 @@
-FROM python:3.11
+FROM python:3.12
 
 WORKDIR /home/jupyter
 
@@ -9,7 +9,7 @@ RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
 ENV PATH="${CARGO_HOME}/bin:${PATH}"
 
 # Install poetry
-RUN pip install 'poetry==1.4.2'
+RUN pip install 'poetry==2.3.3'
 
 COPY musii_kit musii_kit
 COPY README.md README.md
@@ -22,7 +22,6 @@ RUN useradd jupyter
 RUN chown -R jupyter /home/jupyter
 USER jupyter
 
-RUN poetry config installer.modern-installation false
 RUN poetry run ./install_kernel.sh --no-cache
 
 # Remove
