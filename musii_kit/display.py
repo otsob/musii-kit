@@ -4,7 +4,7 @@ from copy import deepcopy
 import music21 as m21
 import verovio
 from cairosvg import svg2pdf, svg2png
-from pypdf import PdfMerger
+from pypdf import PdfWriter
 
 
 def default_verovio_options():
@@ -96,7 +96,7 @@ class Notation:
                 pdf_page_files.append(pdf_path)
                 svg2pdf(bytestring=svg_string, write_to=pdf_path)
 
-            merger = PdfMerger()
+            merger = PdfWriter()
 
             for pdf in pdf_page_files:
                 merger.append(pdf)
