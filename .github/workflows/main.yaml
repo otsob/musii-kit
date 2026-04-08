@@ -49,7 +49,7 @@ jobs:
           context: .
           file: docker/Dockerfile
           push: true
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:0.5
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:0.6
 
   bump-version:
     permissions:
