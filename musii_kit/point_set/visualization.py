@@ -37,15 +37,17 @@ class Plot:
         """
         self._patterns.append((pattern, color))
 
-    def show(self):
+    def figure(self):
         """
-        Show the given point set as a scatter plot.
+        Create and return a Matplotlib figure and axes for the point set scatter plot.
+        :return: tuple of (matplotlib.figure.Figure, matplotlib.axes.Axes)
         """
+        fig, ax = plt.subplots()
         points = self._point_set.as_numpy()
-        plt.title(self._point_set.piece_name)
-        plt.scatter(points[:, 0], points[:, 1], s=self.point_size, c=self.point_colors)
-        plt.xlabel('Onset time')
-        plt.ylabel('Pitch number')
+        ax.set_title(self._point_set.piece_name)
+        ax.scatter(points[:, 0], points[:, 1], s=self.point_size, c=self.point_colors)
+        ax.set_xlabel('Onset time')
+        ax.set_ylabel('Pitch number')
 
         if self.measure_lines:
             max_pitch = np.max(points[:, 1])
@@ -55,13 +57,20 @@ class Plot:
                 max_pitch += 1.0
                 min_pitch -= 1.0
 
-            plt.vlines(self.measure_lines, min_pitch, max_pitch, colors='k', linestyles='dotted', alpha=0.25)
+            ax.vlines(self.measure_lines, min_pitch, max_pitch, colors='k', linestyles='dotted', alpha=0.25)
 
         for pattern_with_color in self._patterns:
             pattern = pattern_with_color[0]
             color = pattern_with_color[1]
-            plt.scatter(pattern.as_numpy()[:, 0], pattern.as_numpy()[:, 1], s=self.point_size * 2.0, c=color)
+            ax.scatter(pattern.as_numpy()[:, 0], pattern.as_numpy()[:, 1], s=self.point_size * 2.0, c=color)
 
+        return fig, ax
+
+    def show(self):
+        """
+        Show the given point set as a scatter plot.
+        """
+        self.figure()
         plt.show()
 
 
