@@ -16,8 +16,7 @@ def default_verovio_options():
         'adjustPageWidth': False,
         'header': 'auto',
         'footer': 'none',
-        'condense': 'encoded',
-        'svgCss': 'svg { background: white; }',
+        'condense': 'encoded'
     }
 
 
@@ -26,9 +25,12 @@ class Notation:
 
     :param notation: the notation for which SVG is created
     :param verovio_options: options passed to verovio for rendering
-    :param title: title to use in the visualization if not visualizing a full score"""
+    :param title: title to use in the visualization if not visualizing a full score
+    :param background_color: background color to use for notation """
 
-    def __init__(self, notation: m21.stream.Stream, verovio_options=default_verovio_options(), title=None):
+    def __init__(self, notation: m21.stream.Stream, verovio_options=default_verovio_options(), title=None,
+                 background_color='white'):
+        self.__background_color = background_color
         self.__svg_strings = self.__create_svg_pages(notation, verovio_options, title)
 
     @staticmethod
@@ -79,7 +81,7 @@ class Notation:
         return svg_strings
 
     def _repr_html_(self):
-        return f'<div style="white-space: nowrap">{"".join(self.__svg_strings)}</div>'
+        return f'<div style="white-space: nowrap; background: {self.__background_color};">{"".join(self.__svg_strings)}</div>'
 
     def to_pdf(self, file_path):
         """ Writes the notation visualization to a pdf file.
