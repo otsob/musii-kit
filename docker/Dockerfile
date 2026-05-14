@@ -15,7 +15,7 @@ COPY musii_kit musii_kit
 COPY README.md README.md
 COPY pyproject.toml pyproject.toml
 COPY poetry.lock poetry.lock
-COPY install_kernel.sh install_kernel.sh
+COPY script/install_kernel.sh install_kernel.sh
 COPY examples /home/jupyter/examples
 
 RUN useradd jupyter
