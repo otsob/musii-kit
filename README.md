@@ -17,7 +17,7 @@ greatly inspired by the example notebooks associated with the excellent book
 
 ## Installation
 
-Run `poetry run ./install_kernel.sh` to install the musii-kit jupyter kernel.
+Run `poetry run ./script/install_kernel.sh` to install the musii-kit jupyter kernel.
 
 ## Running in a Docker container
 
