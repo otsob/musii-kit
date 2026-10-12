@@ -8,7 +8,7 @@ from musii_kit.point_set.point_set import Pattern, PatternOccurrences
 
 
 class JkuPdd(PatternSet):
-    """ JKU-PDD as a PyTorch compatible data set.
+    """JKU-PDD as a PyTorch compatible data set.
 
     In order to use this class, you need to download JKU-PDD and extract it to some path.
     The path is given as an argument when creating an instance of JkuPdd.
@@ -17,11 +17,9 @@ class JkuPdd(PatternSet):
     0: The composition name as defined in JKU-PDD directory structure combined with _polyphonic or _monophonic
     1: A 2-dimensional point set of the composition (onset, chromatic pitch)
     2: List of PatternOccurrences of all patterns annotated for the composition
-
-    The sectionalRepetitions data is omitted from this data set.
     """
 
-    def __init__(self, path, corpus=['polyphonic', 'monophonic']):
+    def __init__(self, path, corpus=["polyphonic", "monophonic"]):
         """
         Creates a data set of JKU-PDD.
 
@@ -48,14 +46,19 @@ class JkuPdd(PatternSet):
 
         for label in labels:
             pattern_path = os.path.join(base_path, label)
-            occurrences_csv_path = os.path.join(pattern_path, 'occurrences', 'csv')
-            occ_files = filter(lambda file: file.endswith('csv'), next(os.walk(occurrences_csv_path))[2])
+            occurrences_csv_path = os.path.join(pattern_path, "occurrences", "csv")
+            occ_files = filter(
+                lambda file: file.endswith("csv"),
+                next(os.walk(occurrences_csv_path))[2],
+            )
             occurrences = []
             for occ_file in occ_files:
                 occ_csv_path = os.path.join(occurrences_csv_path, occ_file)
                 occurrences.append(self.__read_pattern(occ_csv_path, label, analyst))
 
-            patterns.append(PatternOccurrences(composition, occurrences[0], occurrences[1:]))
+            patterns.append(
+                PatternOccurrences(composition, occurrences[0], occurrences[1:])
+            )
 
         return patterns
 
@@ -66,8 +69,13 @@ class JkuPdd(PatternSet):
         return Pattern(points, label=label, source=analyst)
 
     def __get_composition_point_set(self, data_path):
-        csv_path = list(filter(lambda path: path.endswith('csv'), next(os.walk(os.path.join(data_path, 'csv')))[2]))[0]
-        df = pd.read_csv(os.path.join(data_path, 'csv', csv_path), header=None)
+        csv_path = list(
+            filter(
+                lambda path: path.endswith("csv"),
+                next(os.walk(os.path.join(data_path, "csv")))[2],
+            )
+        )[0]
+        df = pd.read_csv(os.path.join(data_path, "csv", csv_path), header=None)
         return df.to_numpy()[:, 0:2]
 
     def __collect_dataset(self):
@@ -75,23 +83,33 @@ class JkuPdd(PatternSet):
         data_set = []
 
         for data_path in data_paths:
-            patterns_path = os.path.join(data_path, 'repeatedPatterns')
+            patterns_path = os.path.join(data_path, "repeatedPatterns")
             analysts = next(os.walk(patterns_path))[1]
 
-            composition = data_path.split('/')[-2] + '_' + data_path.split('/')[-1]
+            composition = data_path.split("/")[-2] + "_" + data_path.split("/")[-1]
             pattern_occurrences = []
 
             # For polyphonic corpus barlowAndMorgenstern should be
             # excluded.
-            if 'polyphonic' in data_path and 'barlowAndMorgenstern' in analysts:
-                analysts.remove('barlowAndMorgenstern')
+            if "polyphonic" in data_path and "barlowAndMorgenstern" in analysts:
+                analysts.remove("barlowAndMorgenstern")
 
             for analyst in analysts:
                 analyst_path = os.path.join(patterns_path, analyst)
                 pattern_labels = next(os.walk(analyst_path))[1]
-                pattern_occurrences.extend(self.__collect_patterns(analyst_path, pattern_labels, composition, analyst))
+                pattern_occurrences.extend(
+                    self.__collect_patterns(
+                        analyst_path, pattern_labels, composition, analyst
+                    )
+                )
 
-            data_set.append((composition, self.__get_composition_point_set(data_path), pattern_occurrences))
+            data_set.append(
+                (
+                    composition,
+                    self.__get_composition_point_set(data_path),
+                    pattern_occurrences,
+                )
+            )
 
         return data_set
 
