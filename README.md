@@ -13,6 +13,7 @@ greatly inspired by the example notebooks associated with the excellent book
 * Jupyter
 * Poetry
 * Rust (for `posemirpy`)
+* `swig` for `verovio`
 * [Bump2version](https://pypi.org/project/bump2version/) for version bumping
 
 ## Installation

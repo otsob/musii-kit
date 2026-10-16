@@ -907,7 +907,7 @@ class Pattern2d(PointSet2d):
         label = input_dict['label']
         source = input_dict['source']
         data_type = input_dict['dtype']
-        pitch_type = input_dict['pitch_type']
+        pitch_type = input_dict['pitch_type'] if 'pitch_type' in input_dict else 'chromatic'
         points = list(map(lambda row: Point2d(row[0], row[1]), input_dict['data']))
         pattern_id = input_dict['id'] if 'id' in input_dict else None
         piece_name = input_dict['piece_name'] if 'piece_name' in input_dict else None
